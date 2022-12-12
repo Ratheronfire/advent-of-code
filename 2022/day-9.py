@@ -1,30 +1,14 @@
-input_path = "2022/inputs/day-9.txt"
+from typing import List
 
+from puzzle_base import PuzzleBase
 
-tiles_visited = []
-
-segment_count = 10
-rope_segments = [[0, 0] for i in range(segment_count)]
-
-tiles_visited.append([0, 0])
-
-head_movements = {
+HEAD_MOVEMENTS = {
     'U': (0, 1),
     'D': (0, -1),
     'L': (-1, 0),
     'R': (1, 0),
     'N': (0, 0)
 }
-
-
-def parse_input():
-    _moves = []
-    with open(input_path, 'r') as input_file:
-        for line in input_file.readlines():
-            _move = line.strip().split(' ')
-            _moves.append((_move[0], int(_move[1])))
-
-    return _moves
 
 
 def are_equal_vectors(a, b):
@@ -38,72 +22,102 @@ def move_vector(v, movement):
     return v
 
 
-def print_grid():
-    x_values = [t[0] for t in tiles_visited] + [s[0] for s in rope_segments]
-    y_values = [t[1] for t in tiles_visited] + [s[1] for s in rope_segments]
+class Puzzle(PuzzleBase):
+    year = 2022
+    day = 9
 
-    x_values.sort()
-    y_values.sort()
+    moves = []
+    tiles_visited = []
+    rope_segments = []
 
-    grid_str = ''
-    for y in reversed(range(y_values[0], y_values[-1] + 1)):
-        for x in range(x_values[0], x_values[-1] + 1):
-            is_occupied = False
+    def reset(self):
+        self.rope_segments = []
+        self.tiles_visited = [[0, 0]]
+        self.moves = []
 
-            for i in range(len(rope_segments)):
-                if are_equal_vectors(rope_segments[i], [x, y]):
-                    grid_str += str(i) if i > 0 else 'H'
-                    is_occupied = True
-                    break
+    def prepare_data(self, input_data: List[str], current_part: int):
+        self.rope_segments = [[0, 0] for _ in range(2 if current_part == 1 else 10)]
 
-            if not is_occupied:
-                if are_equal_vectors([x, y], [0, 0]):
-                    grid_str += 's'
-                elif any([t for t in tiles_visited if are_equal_vectors(t, [x, y])]):
-                    grid_str += '#'
-                else:
-                    grid_str += '.'
+        for i in range(len(input_data)):
+            line = input_data[i].strip()
 
-        grid_str += '\n'
+            if line == '':
+                continue
 
-    print(grid_str)
+            move = line.split(' ')
+            self.moves.append((move[0], int(move[1])))
 
+    def get_day_1_answer(self, use_sample=False) -> str:
+        self.perform_moves()
+        return str(len(self.tiles_visited))
 
-def perform_move(direction):
-    head_movement = head_movements[direction]
-    rope_segments[0] = move_vector(rope_segments[0], head_movement)
+    def get_day_2_answer(self, use_sample=False) -> str:
+        self.perform_moves()
+        return str(len(self.tiles_visited))
 
-    for i in range(1, len(rope_segments)):
-        curr_segment = rope_segments[i]
-        prev_segment = rope_segments[i-1]
+    def perform_moves(self):
+        for move in self.moves:
+            for i in range(move[1]):
+                self.perform_move(move[0])
 
-        segment_movement = [0, 0]
+    def perform_move(self, direction):
+        head_movement = HEAD_MOVEMENTS[direction]
+        self.rope_segments[0] = move_vector(self.rope_segments[0], head_movement)
 
-        if prev_segment[0] == curr_segment[0] and abs(prev_segment[1] - curr_segment[1]) > 1:
-            # Vertical movement
-            segment_movement[1] = 1 if prev_segment[1] > curr_segment[1] else -1
-        elif prev_segment[1] == curr_segment[1] and abs(prev_segment[0] - curr_segment[0]) > 1:
-            # Horizontal movement
-            segment_movement[0] = 1 if prev_segment[0] > curr_segment[0] else -1
-        else:
-            # Diagonal movement, or none
-            if abs(prev_segment[0] - curr_segment[0]) > 1 or abs(prev_segment[1] - curr_segment[1]) > 1:
-                segment_movement[0] = 1 if prev_segment[0] > curr_segment[0] else -1
+        for i in range(1, len(self.rope_segments)):
+            curr_segment = self.rope_segments[i]
+            prev_segment = self.rope_segments[i-1]
+
+            segment_movement = [0, 0]
+
+            if prev_segment[0] == curr_segment[0] and abs(prev_segment[1] - curr_segment[1]) > 1:
+                # Vertical movement
                 segment_movement[1] = 1 if prev_segment[1] > curr_segment[1] else -1
+            elif prev_segment[1] == curr_segment[1] and abs(prev_segment[0] - curr_segment[0]) > 1:
+                # Horizontal movement
+                segment_movement[0] = 1 if prev_segment[0] > curr_segment[0] else -1
+            else:
+                # Diagonal movement, or none
+                if abs(prev_segment[0] - curr_segment[0]) > 1 or abs(prev_segment[1] - curr_segment[1]) > 1:
+                    segment_movement[0] = 1 if prev_segment[0] > curr_segment[0] else -1
+                    segment_movement[1] = 1 if prev_segment[1] > curr_segment[1] else -1
 
-        if not are_equal_vectors(segment_movement, [0, 0]):
-            rope_segments[i] = move_vector(curr_segment, segment_movement)
+            if not are_equal_vectors(segment_movement, [0, 0]):
+                self.rope_segments[i] = move_vector(curr_segment, segment_movement)
 
-    if rope_segments[-1] not in tiles_visited:
-        tiles_visited.append([rope_segments[-1][0], rope_segments[-1][1]])
+        if self.rope_segments[-1] not in self.tiles_visited:
+            self.tiles_visited.append([self.rope_segments[-1][0], self.rope_segments[-1][1]])
+
+    def __str__(self):
+        x_values = [t[0] for t in self.tiles_visited] + [s[0] for s in self.rope_segments]
+        y_values = [t[1] for t in self.tiles_visited] + [s[1] for s in self.rope_segments]
+
+        x_values.sort()
+        y_values.sort()
+
+        grid_str = ''
+        for y in reversed(range(y_values[0], y_values[-1] + 1)):
+            for x in range(x_values[0], x_values[-1] + 1):
+                is_occupied = False
+
+                for i in range(len(self.rope_segments)):
+                    if are_equal_vectors(self.rope_segments[i], [x, y]):
+                        grid_str += str(i) if i > 0 else 'H'
+                        is_occupied = True
+                        break
+
+                if not is_occupied:
+                    if are_equal_vectors([x, y], [0, 0]):
+                        grid_str += 's'
+                    elif any([t for t in self.tiles_visited if are_equal_vectors(t, [x, y])]):
+                        grid_str += '#'
+                    else:
+                        grid_str += '.'
+
+            grid_str += '\n'
+
+        return grid_str
 
 
-moves = parse_input()
-
-for move in moves:
-    for i in range(move[1]):
-        perform_move(move[0])
-
-print_grid()
-
-print(len(tiles_visited))
+puzzle = Puzzle()
+print(puzzle.test_and_run())

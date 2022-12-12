@@ -1,44 +1,56 @@
-input_path = "inputs/day-2.txt"
+from typing import List
 
-inputs = ["A", "B", "C"]
-outputs = ["X", "Y", "Z"]
+from puzzle_base import PuzzleBase
 
-score = 0
-correct_score = 0
 
-with open(input_path, 'r') as input_file:
-    for line in input_file.readlines():
-        plays = line.strip().split(' ')
+class Puzzle(PuzzleBase):
+    year = 2022
+    day = 2
 
-        input_score = inputs.index(plays[0])
-        output_score = outputs.index(plays[1])
+    inputs = ["A", "B", "C"]
+    outputs = ["X", "Y", "Z"]
 
-        winning_play = input_score + 1 if input_score < 2 else 0
-        losing_play = input_score - 1 if input_score > 0 else 2
+    score = 0
 
-        score += output_score + 1  # base score
+    def reset(self):
+        self.score = 0
 
-        part_1_result = 'Lose'
-        if input_score == output_score:  # draw
-            part_1_result = 'Draw'
-            score += 3
-        elif output_score == winning_play:
-            part_1_result = 'Win'
-            score += 6
+    def prepare_data(self, input_data: List[str], current_part: int):
+        for i in range(len(input_data)):
+            line = input_data[i]
 
-        # print('%s vs. %s; %s (+%d)' % (plays[0], plays[1], part_1_result, output_score + 1))
+            if line == '':
+                continue
 
-        # part 2
-        part_2_score = 0
-        if output_score == 0:  # lose
-            part_2_score = losing_play + 1
-        elif output_score == 1:  # draw
-            part_2_score = 3 + input_score + 1
-        elif output_score == 2:  # win
-            part_2_score = 6 + winning_play + 1
+            plays = line.strip().split(' ')
 
-        # print('%s - %s; %d' % (plays[0], ['Lose', 'Draw', 'Win'][output_score], part_2_score))
-        correct_score += part_2_score
+            input_score = self.inputs.index(plays[0])
+            output_score = self.outputs.index(plays[1])
 
-print(score)
-print(correct_score)
+            winning_play = input_score + 1 if input_score < 2 else 0
+            losing_play = input_score - 1 if input_score > 0 else 2
+
+            if current_part == 1:
+                self.score += output_score + 1  # base score
+
+                if input_score == output_score:  # draw
+                    self.score += 3
+                elif output_score == winning_play:
+                    self.score += 6
+            elif current_part == 2:
+                if output_score == 0:  # lose
+                    self.score += losing_play + 1
+                elif output_score == 1:  # draw
+                    self.score += 3 + input_score + 1
+                elif output_score == 2:  # win
+                    self.score += 6 + winning_play + 1
+
+    def get_day_1_answer(self, use_sample=False) -> str:
+        return str(self.score)
+
+    def get_day_2_answer(self, use_sample=False) -> str:
+        return str(self.score)
+
+
+puzzle = Puzzle()
+print(puzzle.test_and_run())
