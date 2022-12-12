@@ -56,48 +56,65 @@ class PuzzleBase(object):
                 self.should_strip_data
             )
 
-    def test_answers(self) -> (bool, str, str):
+    def test_answers(self, both_parts=True) -> (bool, str, str):
+        answer_1 = ''
+        answer_2 = ''
+
+        part_1_correct = True
+        part_2_correct = True
+
         self.reset()
         self.prepare_data(self.sample_data.input_data, 1)
         answer_1 = self.get_day_1_answer(True)
+        part_1_correct = answer_1 == self.sample_data.answer_1
 
-        self.reset()
-        self.prepare_data(self.sample_data.input_data_2, 2)
-        answer_2 = self.get_day_2_answer(True)
+        if both_parts:
+            self.reset()
+            self.prepare_data(self.sample_data.input_data_2, 2)
+            answer_2 = self.get_day_2_answer(True)
+            part_2_correct = answer_2 == self.sample_data.answer_2
 
-        return answer_1 == self.sample_data.answer_1 and answer_2 == self.sample_data.answer_2, answer_1, answer_2
+        return part_1_correct and part_2_correct, answer_1, answer_2
 
-    def run(self) -> (str, str):
+    def run(self, both_parts=True) -> (str, str):
+        answer_1 = ''
+        answer_2 = ''
+
         self.reset()
         self.prepare_data(self.input_data, 1)
         answer_1 = self.get_day_1_answer(False)
 
-        self.reset()
-        self.prepare_data(self.input_data, 2)
-        answer_2 = self.get_day_2_answer(False)
+        if both_parts:
+            self.reset()
+            self.prepare_data(self.input_data, 2)
+            answer_2 = self.get_day_2_answer(False)
 
         return answer_1, answer_2
 
-    def test_and_run(self) -> str:
-        test_results = self.test_answers()
+    def test_and_run(self, both_parts=True) -> str:
+        test_results = self.test_answers(both_parts)
         if not test_results[0]:
-            return 'Test runs failed.\n\n' \
-                   '=== Part 1 ===\n' \
-                   'Expected:\n' \
-                   '%s\n\n' \
-                   'Actual:\n' \
-                   '%s\n\n' \
-                   '=== Part 2===\n' \
-                   'Expected:\n' \
-                   '%s\n\n' \
-                   'Actual:\n' \
-                   '%s' % (self.sample_data.answer_1, test_results[1], self.sample_data.answer_2, test_results[2])
+            results = 'Test run%s failed.\n\n' \
+                      '=== Part 1 ===\n' \
+                      'Expected:\n' \
+                      '%s\n\n' \
+                      'Actual:\n' \
+                      '%s' % ('s' if both_parts else '', self.sample_data.answer_1, test_results[1])
+
+            if both_parts:
+                results += '\n\n=== Part 2===\n' \
+                           'Expected:\n' \
+                           '%s\n\n' \
+                           'Actual:\n' \
+                           '%s' % (self.sample_data.answer_2, test_results[2])
         else:
-            answers = self.run()
-            return '=== Part 1===\n' \
-                   '%s\n\n' \
-                   '=== Part 2===\n' \
-                   '%s' % (answers[0], answers[1])
+            answers = self.run(both_parts)
+            results = '=== Part 1===\n%s' % answers[0]
+
+            if both_parts:
+                results += '\n\n=== Part 2===\n%s' % answers[1]
+
+        return results
 
     @abstractmethod
     def reset(self):
