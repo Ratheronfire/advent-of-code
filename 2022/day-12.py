@@ -47,7 +47,7 @@ class Map(object):
 
             for j in range(len(line)):
                 char = line[j]
-                node_row.append(Node(j, i, ord('z') - ord(char) if char not in 'SE' else 0))
+                node_row.append(Node(j, i, ord(char) - ord('a') if char not in 'SE' else 0))
 
             self.nodes.append(node_row)
 
@@ -55,13 +55,14 @@ class Map(object):
                 row_index = line.index('S')
                 self.start_pos = (row_index, i)
                 self.nodes[i][row_index].is_start = True
-                self.nodes[i][row_index].elevation = ord('z') - ord('a') - 1
-                self.nodes[i][row_index].distance = 0
+                self.nodes[i][row_index].elevation = 0
 
             if 'E' in line:
                 row_index = line.index('E')
                 self.end_pos = (row_index, i)
                 self.nodes[i][row_index].is_end = True
+                self.nodes[i][row_index].elevation = ord('z') - ord('a')
+                self.nodes[i][row_index].distance = 0
 
     def get_node(self, x: int, y: int) -> Optional[Node]:
         if x < 0 or x >= len(self.nodes[0]) or y < 0 or y >= len(self.nodes):
@@ -79,7 +80,7 @@ class Map(object):
         old_start = self.nodes[self.start_pos[1]][self.start_pos[0]]
 
         old_start.is_start = False
-        old_start.elevation = ord('z') - ord('a')
+        old_start.elevation = 0
         old_start.distance = sys.maxsize
 
         self.start_pos = new_start_pos
@@ -87,7 +88,7 @@ class Map(object):
         new_start = self.nodes[self.start_pos[1]][self.start_pos[0]]
 
         new_start.is_start = True
-        new_start.elevation = ord('z') - ord('a')
+        new_start.elevation = 0
         new_start.distance = 0
 
     def __str__(self):
@@ -106,10 +107,10 @@ class Map(object):
                     node_offset = str(node.next_node_in_path.x - node.x) + str(node.next_node_in_path.y - node.y)
 
                     map_str += {
-                        '01': 'v',
-                        '0-1': '^',
-                        '10': '>',
-                        '-10': '<'
+                        '01': '^',
+                        '0-1': 'v',
+                        '10': '<',
+                        '-10': '>'
                     }[node_offset]
                 else:
                     map_str += '.'
@@ -140,7 +141,7 @@ class Puzzle(PuzzleBase):
 
         for row in self.map.nodes:
             for node in row:
-                if not node.is_start:
+                if not node.is_end:
                     node.distance = sys.maxsize
                 node.last_node = None
                 node.next_node_in_path = None
@@ -150,6 +151,9 @@ class Puzzle(PuzzleBase):
         while len(node_queue):
             node_queue = sorted(node_queue, key=lambda node: node.distance, reverse=True)
             node = node_queue.pop()
+
+            # if node.distance >= sys.maxsize:
+            #     return False
 
             for movement in self.movements:
                 next_node_coords = (node.y + movement[0], node.x + movement[1])
@@ -163,12 +167,38 @@ class Puzzle(PuzzleBase):
                     next_node.distance = movement_cost
                     next_node.last_node = node
 
-    def retrace_path(self) -> int:
-        current_node = self.map.get_end_node()
-        start_node = self.map.get_start_node()
+        return True
+
+    def is_valid_start(self, coordinates):
+        start = self.map.get_node(coordinates[1], coordinates[0])
+
+        node_queue = [start]
+        visited_nodes = []
+
+        while len(node_queue):
+            node = node_queue.pop()
+            visited_nodes.append(node)
+
+            for movement in self.movements:
+                next_node_coords = (node.y + movement[0], node.x + movement[1])
+                next_node = self.map.get_node(next_node_coords[1], next_node_coords[0])
+
+                if not next_node or next_node in visited_nodes:
+                    continue
+
+                if next_node.elevation == 0:
+                    node_queue.append(next_node)
+                elif next_node.elevation == 1:
+                    return True
+
+        return False
+
+    def retrace_path(self, goal_coords) -> int:
+        current_node = self.map.get_node(goal_coords[0], goal_coords[1])
+        goal_node = self.map.get_end_node()
 
         path_len = 0
-        while current_node != start_node:
+        while current_node != goal_node:
             if not current_node or not current_node.last_node:
                 return sys.maxsize
 
@@ -182,30 +212,27 @@ class Puzzle(PuzzleBase):
     def get_day_1_answer(self, use_sample=False) -> str:
         self.calc_path()
 
-        path_len = self.retrace_path()
+        path_len = self.retrace_path(self.map.start_pos)
+
+        print(self.map)
 
         return str(path_len)
 
     def get_day_2_answer(self, use_sample=False) -> str:
-        a_candidates = [self.map.start_pos]
-        a_distances = []
+        self.calc_path()
+
+        a_candidates = []
 
         for i in range(len(self.map.nodes)):
             for j in range(len(self.map.nodes[i])):
                 node = self.map.nodes[i][j]
 
-                if node.elevation == ord('z') - ord('a'):
+                if node.elevation == 0:
                     a_candidates.append((j, i))
 
-        for candidate in a_candidates:
-            self.map.set_start(candidate)
-            self.calc_path()
+        path_lens = [self.retrace_path(candidate) for candidate in a_candidates]
 
-            a_distances.append(self.retrace_path())
-
-            print('Tested %d/%d paths.' % (a_candidates.index(candidate) + 1, len(a_candidates)))
-
-        return str(min(a_distances))
+        return str(min(path_lens))
 
 
 puzzle = Puzzle()
