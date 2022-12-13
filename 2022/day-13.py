@@ -63,17 +63,12 @@ class Puzzle(PuzzleBase):
         left_is_num = isinstance(left, int)
         right_is_num = isinstance(right, int)
 
-        print('===\nComparing %s and %s.' % (str(left), str(right)))
-
         if left_is_num and not right_is_num:
-            print('Converting left (%d) to array.' % left)
             left = [left]
         elif not left_is_num and right_is_num:
-            print('Converting right (%d) to array.' % right)
             right = [right]
 
         if isinstance(left, int):
-            print('Testing %d <= %d (%s).' % (left, right, str(left <= right)))
 
             if left == right:
                 return 0
@@ -88,30 +83,23 @@ class Puzzle(PuzzleBase):
 
                 inner_sort_state = self.are_values_sorted(inner_left, inner_right)
                 if inner_sort_state == -1:
-                    print('Array %s is not less than %s; *Not in the right order.*' % (str(left), str(right)))
                     return -1
                 elif inner_sort_state == 1:
-                    print('Array %s is less than %s; *In the right order.*' % (str(left), str(right)))
                     return 1
 
             if len(left) == 0 and len(right) == 0:
-                print('Both arrays are empty; continuing.')
                 return 0
             elif len(left) == 0:
-                print('Left array is empty; *In the right order.*')
                 return 1
             elif len(right) == 0:
-                print('Right array is empty; *Not in the right order.*')
                 return -1
 
-        print('*Assuming we\'re in the right order.*')
         return 1
 
     def get_day_1_answer(self, use_sample=False) -> str:
         good_packets = []
 
         for i in range(0, len(self.packets), 2):
-            print('\n======\n')
             left_packet = self.packets[i]
             right_packet = self.packets[i + 1]
 
