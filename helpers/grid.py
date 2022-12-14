@@ -1,5 +1,7 @@
 from typing import List, Tuple
 
+# Based on code from https://www.reddit.com/r/adventofcode/comments/zkc974/python_data_structures_for_2d_grids/
+
 
 class Grid(object):
     grid = {}
@@ -12,7 +14,7 @@ class Grid(object):
         self._calculate_extents()
 
     def __getitem__(self, item: Tuple[int, int]):
-        return self.grid[item]
+        return self.grid[item] if item in self.grid else None
 
     def __setitem__(self, key: Tuple[int, int], value):
         self.grid[key] = value
@@ -32,9 +34,17 @@ class Grid(object):
 
     def _calculate_extents(self):
         self.extents = (
-            max([pos[0] for pos in grid.keys()]),
-            max([pos[1] for pos in grid.keys()])
+            max([pos[0] for pos in self.grid.keys()]),
+            max([pos[1] for pos in self.grid.keys()])
         )
+
+    @staticmethod
+    def create_empty(width: int, height: int, default_value):
+        grid = Grid({(x, y): default_value for y, line in enumerate(range(height))
+                     for x, _ in enumerate(range(width))})
+        grid.extents = (width, height)
+
+        return grid
 
     @staticmethod
     def from_number_strings(strings: List[str]):
