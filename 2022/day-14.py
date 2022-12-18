@@ -26,9 +26,9 @@ class Puzzle(PuzzleBase):
 
             points = [[int(num) for num in pair.split(',')] for pair in line.split(' -> ')]
 
-            for i in range(len(points) - 1):
-                point = points[i]
-                next_point = points[i+1]
+            for j in range(len(points) - 1):
+                point = points[j]
+                next_point = points[j+1]
 
                 if point[1] > self.last_y_pos:
                     self.last_y_pos = point[1]

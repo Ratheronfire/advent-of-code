@@ -30,7 +30,7 @@ class Grid(object):
                     try:
                         subgrid[(sub_x, sub_y)] = self.grid[(x, y)]
                     except KeyError:
-                        subgrid[(sub_x, sub_y)] = '.'
+                        subgrid[(sub_x, sub_y)] = '░░'
                     sub_y += 1
                 sub_x += 1
                 sub_y = 0
@@ -59,7 +59,7 @@ class Grid(object):
     def __str__(self):
         return '\n'.join([
             ''.join([
-                str(self[(x, y)] or '.') for x in range(self.extents[0][0], self.extents[0][1] + 1)
+                str(self[(x, y)] or '░░') for x in range(self.extents[0][0], self.extents[0][1] + 1)
             ]) for y in range(self.extents[1][0], self.extents[1][1] + 1)
         ])
 

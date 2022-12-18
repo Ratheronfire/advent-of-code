@@ -23,7 +23,7 @@ class Puzzle(PuzzleBase):
     beaconless_polygons: Polygon
 
     def reset(self):
-        self.grid = Grid.create_empty(0, 0, '.')
+        self.grid = Grid.create_empty(0, 0, '░░')
 
         self.sensor_beacons = {}
         self.sensor_distances = {}
@@ -43,25 +43,25 @@ class Puzzle(PuzzleBase):
             sensor = (int(point_data[1]), int(point_data[2]))
             beacon = (int(point_data[3]), int(point_data[4]))
 
-            self.grid[sensor] = 'S'
-            self.grid[beacon] = 'B'
+            self.grid[sensor] = 'SS'
+            self.grid[beacon] = 'BB'
 
             self.sensor_beacons[sensor] = beacon
             self.sensor_distances[sensor] = abs(sensor[0] - beacon[0]) + abs(sensor[1] - beacon[1])
 
     def try_marking(self, point):
-        if not self.grid[point] or self.grid[point] == '.':
-            self.grid[point] = '#'
+        if not self.grid[point] or self.grid[point] == '░░':
+            self.grid[point] = '██'
 
     def mark_beaconles_spots(self, sensor_pos):
         beacon = self.sensor_beacons[sensor_pos]
 
         distance = abs(beacon[0] - sensor_pos[0]) + abs(beacon[1] - sensor_pos[1])
 
-        for x in range(sensor_pos[0] - distance + 1, sensor_pos[0] + distance):
+        for x in range(sensor_pos[0] - distance - 1, sensor_pos[0] + distance + 1):
             self.try_marking((x, sensor_pos[1]))
 
-            for y in range(distance - abs(x - sensor_pos[0])):
+            for y in range(distance - abs(x - sensor_pos[0]) + 1):
                 self.try_marking((x, sensor_pos[1] + y))
                 self.try_marking((x, sensor_pos[1] - y))
 
@@ -94,19 +94,15 @@ class Puzzle(PuzzleBase):
 
         for x in range(sensor_pos[0] - remaining_distance, sensor_pos[0] + remaining_distance + 1):
             point = (x, y_to_scan)
-            if not self.grid[point] or self.grid[point] == '.':
+            if not self.grid[point] or self.grid[point] == '░░':
                 self.unoccupied_tiles.add(point)
 
     def get_day_1_answer(self, use_sample=False) -> str:
         y_to_scan = 10 if use_sample else 2000000
 
         key_len = len(self.sensor_beacons.keys())
-        points_done = 0
         for point in self.sensor_beacons.keys():
             self.find_beaconless_tiles_in_row(point, y_to_scan)
-
-            points_done += 1
-            print('%d/%d points processed.' % (points_done, key_len))
 
         return str(len(self.unoccupied_tiles))
 
@@ -125,7 +121,7 @@ class Puzzle(PuzzleBase):
 
         for polygon_point in polygon_points:
             p0, p1 = polygon_point
-            if self.grid[(p0 + 2, p1)] and self.grid[(p0 + 2, p1)] in 'SB#':
+            if self.grid[(p0 + 2, p1)] and self.grid[(p0 + 2, p1)] in ['SS', 'BB', '██']:
                 continue
 
             if [p for p in polygon_points if p[0] == p0 + 4 and p[1] == p1] and \
