@@ -2,6 +2,7 @@ import itertools
 import math
 import operator
 import re
+import sys
 from functools import reduce
 from typing import List, Union
 
@@ -21,6 +22,9 @@ class Room:
         self.rate = rate
         self.neighbors = neighbors
 
+    def __str__(self):
+        return '%s - Rate %d - %s' % (self.id, self.rate, ('Open' if self.open else 'Closed'))
+
 
 class Puzzle(PuzzleBase):
     year = 2022
@@ -31,6 +35,8 @@ class Puzzle(PuzzleBase):
     rooms: dict[str, Room] = {}
 
     cached_room_paths = {}
+
+    test_run_count = 0
 
     def reset(self):
         self.minutes = 30
@@ -54,30 +60,33 @@ class Puzzle(PuzzleBase):
         if cached_index in self.cached_room_paths:
             return self.cached_room_paths[cached_index]
 
-        visited_rooms = [current_room]
-        room_queue = [current_room]
+        room_queue = [r for r in self.rooms.values()]
 
         starting_room = current_room
 
         parents = {}
+        distances = {key: sys.maxsize for key in self.rooms.keys()}
+        distances[current_room.id] = 0
 
         # first, BFS to find the goal
         while len(room_queue):
+            room_queue = sorted(room_queue, key=lambda r: distances[r.id], reverse=True)
             current_room = room_queue.pop()
-            if current_room == goal_room:
-                break
 
             for neighbor_id in current_room.neighbors:
                 neighbor = self.rooms[neighbor_id]
-                if neighbor in visited_rooms:
+                if neighbor not in room_queue:
                     continue
 
-                visited_rooms.append(neighbor)
-                parents[neighbor] = current_room
-                room_queue.append(neighbor)
+                new_distance = distances[current_room.id] + 1
+                if new_distance < distances[neighbor.id]:
+                    distances[neighbor.id] = new_distance
+                    parents[neighbor] = current_room
+                    room_queue.append(neighbor)
 
         # now, backtrack
         path_to_room = []
+        current_room = goal_room
         while current_room != starting_room:
             path_to_room.append(current_room)
             current_room = parents[current_room]
@@ -93,24 +102,12 @@ class Puzzle(PuzzleBase):
                 if room_a != room_b:
                     self.cached_room_paths[(room_a, room_b)] = self.get_path_to_target(room_a, room_b)
 
-    def calculate_ideal_score(self, rooms):
-        score = 0
-        for i in range(len(rooms)):
-            room = rooms[i]
-
-            if isinstance(room, str):
-                room = self.rooms[room]
-
-            score += room.rate * (28 - i * 2)
-
-        return score
-
     def release_pressure(self):
         if self.minutes <= 0:
             return
 
         pressure = sum([r.rate for r in self.rooms.values() if r.open])
-        # print('Minute %d: releasing %d pressure.' % (30 - self.minutes + 1, pressure))
+        print('Minute %d: releasing %d pressure.' % (30 - self.minutes + 1, pressure))
         self.pressure_released += pressure
 
     def navigate_caves(self, room: Room, hardcoded_room_order: list[Room] = None):
@@ -143,101 +140,69 @@ class Puzzle(PuzzleBase):
 
                 if len(current_path) == 0:
                     self.minutes -= 1
+                    print('Minute %d: Opening valve %s (rate = %d, total pressure = %d).' %
+                          (30 - self.minutes + 1, room.id, room.rate, room.rate * (self.minutes - 1)))
 
-                    # print('Opening valve %s; %d minute(s) left.' % (room.id, self.minutes))
                     self.release_pressure()
 
                     room.open = True
 
             self.minutes -= 1
-
             self.release_pressure()
 
         return self.pressure_released
 
-    def find_chained_nodes(self):
-        chains = []
+    def get_highest_subpath(self, starting_room, minutes_left=30, score_so_far=0, opened_rooms=None):
+        if opened_rooms is None:
+            opened_rooms = []
 
-        #  Get all nodes that have only one neighbor
-        dead_ends = [r for r in self.rooms.values() if r.rate > 0 and len(r.neighbors) == 1]
-        for dead_end in dead_ends:
-            chain = []
+        remaining_rooms = [r for r in self.rooms.values()
+                           if r.rate > 0 and
+                           r not in opened_rooms]
 
-            current_node = dead_end
+        score_per_turn = sum([r.rate for r in self.rooms.values() if r in opened_rooms])
 
-            #  Walking back to the last node in this one-way route
-            while len(current_node.neighbors) <= 2:
-                chain.append(current_node)
-                neighbors = [n for n in current_node.neighbors if not self.rooms[n] in chain]
-                current_node = self.rooms[neighbors[0]]
+        if len(remaining_rooms) == 0:
+            return score_so_far + score_per_turn * minutes_left
+        else:
+            subpath_totals = []
+            for next_room in remaining_rooms:
+                minutes_taken = len(self.cached_room_paths[(starting_room.id, next_room.id)]) + 1
 
-            #  Filtering out nodes that have 0 rate
-            chain = [n for n in chain if n.rate > 0]
+                sub_minutes_left = minutes_left - minutes_taken
+                if sub_minutes_left < 0:
+                    continue
 
-            if len(chain) > 1:
-                #  Now finding the ideal permutation for this chain.
-                best_permutation = self.find_highest_permutation(chain[-1], chain)
+                sub_score_so_far = score_so_far + minutes_taken * score_per_turn
+                sub_opened_rooms = [r for r in opened_rooms]
+                sub_opened_rooms.append(next_room)
 
-                chain = best_permutation[1]
+                subpath_totals.append((next_room, self.get_highest_subpath(next_room, sub_minutes_left, sub_score_so_far, sub_opened_rooms)))
 
-            chains.append(chain)
+            max_possible_score = score_so_far + score_per_turn * minutes_left
+            if len(subpath_totals):
+                max_path = max(subpath_totals, key=lambda r: r[1])
+                max_possible_score = max_path[1]
 
-        return chains
-
-    def find_highest_permutation(self, starting_room: Room, room_ids: list[Union[Room, list[Room]]]):
-        best_so_far = 0
-        best_permutation = []
-
-        total_runs = math.factorial(len(room_ids))
-        i = 0
-        for permutation in itertools.permutations(room_ids):
-            if isinstance(permutation, Room):
-                permutation = [permutation]
-
-            #  flattening the list down, to preserve precalculated chains
-            flat_permutation = []
-            for item in permutation:
-                if isinstance(item, Room):
-                    flat_permutation.append(item)
-                elif isinstance(item, list):
-                    flat_permutation += item
-
-            if best_so_far > self.calculate_ideal_score(flat_permutation):
-                print('Skipping.')
-                continue
-
-            new_score = self.navigate_caves(starting_room, flat_permutation)
-
-            if new_score > best_so_far:
-                best_so_far = new_score
-                best_permutation = flat_permutation
-                print('New best score: %d (%s).' % (new_score, ', '.join([r.id for r in flat_permutation])))
-
-            i += 1
-
-            if i > 0 and i % 100000 == 0:
-                print('%d/%d (%d%%).' % (i, total_runs, 100 * i / total_runs))
-
-        return best_so_far, best_permutation
+            return max_possible_score
 
     def get_day_1_answer(self, use_sample=False) -> str:
         self.precalculate_room_traversals()
 
         starting_room = self.rooms['AA']
 
-        all_scoring_rooms = sorted([r for r in self.rooms.values() if r.rate > 0], key=lambda r: r.rate)
+        best_score = self.get_highest_subpath(starting_room)
 
-        chains = self.find_chained_nodes()
-        for chain in chains:
-            for room in chain:
-                all_scoring_rooms.remove(room)
-            all_scoring_rooms.append(chain)
-
-        best_so_far = self.find_highest_permutation(starting_room, all_scoring_rooms)
-
-        return str(best_so_far[0])
+        return str(best_score)
 
     def get_day_2_answer(self, use_sample=False) -> str:
+        # self.precalculate_room_traversals()
+        #
+        # starting_rooms = [self.rooms['AA'], self.rooms['AA']]
+        #
+        # best_score = self.get_highest_subpath(starting_rooms, 26)
+        #
+        # return str(best_score)
         return ''
 
     def to_mermaidjs_str(self):
@@ -251,4 +216,4 @@ class Puzzle(PuzzleBase):
 
 
 puzzle = Puzzle()
-print(puzzle.test_and_run())
+print(puzzle.test_and_run(False))
