@@ -10,10 +10,15 @@ Line = Tuple[Point, Point]
 class Grid(object):
     grid = {}
 
-    extents: Tuple[Tuple[int, int], Tuple[int, int]]
+    extents: List[List[int]] = []
 
-    def __init__(self, grid):
+    invert_y_display = False
+
+    default_value = '░░'
+
+    def __init__(self, grid, default_value='░░'):
         self.grid = grid
+        self.default_value = default_value
 
         self._calculate_extents()
 
@@ -30,7 +35,7 @@ class Grid(object):
                     try:
                         subgrid[(sub_x, sub_y)] = self.grid[(x, y)]
                     except KeyError:
-                        subgrid[(sub_x, sub_y)] = '░░'
+                        subgrid[(sub_x, sub_y)] = self.default_value
                     sub_y += 1
                 sub_x += 1
                 sub_y = 0
@@ -54,13 +59,16 @@ class Grid(object):
             else:
                 self.grid[key] = value
 
-        self._calculate_extents()
+        self._calculate_extents(key)
 
     def __str__(self):
+        y_range = range(self.extents[1][1], self.extents[1][0] - 1, -1) if self.invert_y_display else \
+            range(self.extents[1][0], self.extents[1][1] + 1)
+
         return '\n'.join([
             ''.join([
-                str(self[(x, y)] or '░░') for x in range(self.extents[0][0], self.extents[0][1] + 1)
-            ]) for y in range(self.extents[1][0], self.extents[1][1] + 1)
+                str(self[(x, y)] or self.default_value) for x in range(self.extents[0][0], self.extents[0][1] + 1)
+            ]) for y in y_range
         ])
 
     def neighbors(self, pos: Tuple[int, int]):
@@ -69,27 +77,67 @@ class Grid(object):
         candidates = [(x0 - 1, y0), (x0 + 1, y0), (x0, y0 - 1), (x0, y0 + 1)]
         return [self[p] for p in candidates if p in self]
 
-    def _calculate_extents(self):
+    @property
+    def width(self) -> int:
+        return self.extents[0][1] - self.extents[0][0] + 1
+
+    @property
+    def height(self) -> int:
+        return self.extents[1][1] - self.extents[1][0] + 1
+
+    def _calculate_extents(self, newest_key=None):
         if not len(self.grid.keys()):
-            self.extents = ((0, 0), (0, 0))
+            self.extents = [[0, 0], [0, 0]]
             return
 
-        self.extents = (
-            (min([pos[0] for pos in self.grid.keys()]), max([pos[0] for pos in self.grid.keys()])),
-            (min([pos[1] for pos in self.grid.keys()]), max([pos[1] for pos in self.grid.keys()]))
-        )
+        if self.extents and newest_key:
+            if newest_key[0] < self.extents[0][0]:
+                self.extents[0][0] = newest_key[0]
+            if newest_key[0] > self.extents[0][1]:
+                self.extents[0][1] = newest_key[0]
+            if newest_key[1] < self.extents[1][0]:
+                self.extents[1][0] = newest_key[1]
+            if newest_key[1] > self.extents[1][1]:
+                self.extents[1][1] = newest_key[1]
+
+            return
+
+        self.extents = [
+            [min([pos[0] for pos in self.grid.keys()]), max([pos[0] for pos in self.grid.keys()])],
+            [min([pos[1] for pos in self.grid.keys()]), max([pos[1] for pos in self.grid.keys()])]
+        ]
 
     @staticmethod
-    def create_empty(width: int, height: int, default_value):
+    def create_empty(width: int, height: int, default_value='.'):
         grid = Grid({(x, y): default_value for y, line in enumerate(range(height))
-                     for x, _ in enumerate(range(width))})
+                     for x, _ in enumerate(range(width))}, default_value)
+        grid.default_value = default_value
 
         return grid
 
     @staticmethod
-    def from_number_strings(strings: List[str]):
-        return Grid({(x, y): int(val) for y, line in enumerate(strings)
+    def from_strings(strings: List[str], default_value='.'):
+        grid = Grid({(x, y): val for y, line in enumerate(strings)
                      for x, val in enumerate(line)})
+        grid.default_value = default_value
+
+        return grid
+
+    @staticmethod
+    def from_number_strings(strings: List[str], default_value='.'):
+        grid = Grid({(x, y): int(val) for y, line in enumerate(strings)
+                     for x, val in enumerate(line)})
+        grid.default_value = default_value
+
+        return grid
+
+    @staticmethod
+    def from_array(rows: List[List[Union[any]]], default_value='.'):
+        grid = Grid({(x, y): val for y, line in enumerate(rows)
+                     for x, val in enumerate(line)})
+        grid.default_value = default_value
+
+        return grid
 
     @staticmethod
     def from_dict(grid_dict):
