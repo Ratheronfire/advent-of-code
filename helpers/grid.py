@@ -3,11 +3,97 @@ from typing import List, Tuple, Union, Optional
 # Based on code from https://www.reddit.com/r/adventofcode/comments/zkc974/python_data_structures_for_2d_grids/
 
 
-Point = Tuple[Union[int, float], Union[int, float]]
+class Point:
+    x: Union[int, float]
+    y: Union[int, float]
+
+    _base_type = Union[int, float]
+
+    def scale(self, scalar: Union[int, float]):
+        return Point(self.x * scalar, self.y * scalar)
+
+    def __init__(self, x: _base_type, y: _base_type):
+        self.x = x
+        self.y = y
+
+    def __iter__(self):
+        return iter([self.x, self.y])
+
+    def __getitem__(self, item: int):
+        if item == 0:
+            return self.x
+        elif item == 1:
+            return self.y
+
+    def __str__(self):
+        return str((self.x, self.y))
+
+    def __hash__(self):
+        return hash((self.x, self.y))
+
+    def __eq__(self, other):
+        if isinstance(other, tuple):
+            return (self.x, self.y) == other
+        elif isinstance(other, Point):
+            return self.x == other.x and self.y == other.y
+
+        return False
+
+    def __add__(self, other):
+        return Point(self.x + other[0], self.y + other[1])
+
+    def __sub__(self, other):
+        return Point(self.x - other[0], self.y - other[1])
+
+
+class Point3D(Point):
+    z: Union[int, float]
+
+    _base_type = Union[int, float]
+
+    def scale(self, scalar: Union[int, float]):
+        return Point3D(self.x * scalar, self.y * scalar, self.z * scalar)
+
+    def __init__(self, x: _base_type, y: _base_type, z: _base_type):
+        super().__init__(x, y)
+        self.z = z
+
+    def __iter__(self):
+        return iter([self.x, self.y, self.z])
+
+    def __getitem__(self, item: int):
+        if item == 0:
+            return self.x
+        elif item == 1:
+            return self.y
+        elif item == 2:
+            return self.z
+
+    def __str__(self):
+        return str((self.x, self.y, self.z))
+
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))
+
+    def __eq__(self, other):
+        if isinstance(other, tuple):
+            return (self.x, self.y, self.z) == other
+        elif isinstance(other, Point3D):
+            return self.x == other.x and self.y == other.y and self.z == other.z
+
+        return False
+
+    def __add__(self, other):
+        return Point3D(self.x + other[0], self.y + other[1], self.z + other[2])
+
+    def __sub__(self, other):
+        return Point3D(self.x - other[0], self.y - other[1], self.z - other[2])
+
+
 Line = Tuple[Point, Point]
 
 
-class Grid(object):
+class Grid:
     grid = {}
 
     extents: List[List[int]] = []
@@ -16,13 +102,15 @@ class Grid(object):
 
     default_value = '░░'
 
+    _key_base_type = Tuple[Union[int, float], Union[int, float]]
+
     def __init__(self, grid, default_value='░░'):
         self.grid = grid
         self.default_value = default_value
 
         self._calculate_extents()
 
-    def __getitem__(self, item: Union[Tuple[int, int], slice]):
+    def __getitem__(self, item: Union[Point, _key_base_type, slice]):
         if isinstance(item, slice):
             subgrid = Grid.create_empty(abs(item.stop[0] - item.start[0]) + 1, abs(item.stop[1] - item.start[1]) + 1, ' ')
 
@@ -42,11 +130,13 @@ class Grid(object):
 
             return subgrid
         elif isinstance(item, Tuple):
+            return self.grid[Point(item[0], item[1])] if item in self.grid else None
+        elif isinstance(item, Point):
             return self.grid[item] if item in self.grid else None
         else:
             raise TypeError('Invalid argument for grid indexing.')
 
-    def __setitem__(self, key: Tuple[int, int], value):
+    def __setitem__(self, key: Union[Point, _key_base_type], value):
         if isinstance(key, slice):
             start, stop, step = _get_range_for_slice(key)
 
@@ -54,10 +144,10 @@ class Grid(object):
 
             sub_x, sub_y = (0, 0)
         else:
-            if isinstance(value, List) or isinstance(value, Tuple):
-                raise TypeError('Cannot assign multiple values to a single index.')
-            else:
-                self.grid[key] = value
+            if isinstance(key, tuple):
+                key = Point(key[0], key[1])
+
+            self.grid[key] = value
 
         self._calculate_extents(key)
 
@@ -71,11 +161,11 @@ class Grid(object):
             ]) for y in y_range
         ])
 
-    def neighbors(self, pos: Tuple[int, int]):
+    def neighbors(self, pos: Point):
         x0, y0 = pos
 
         candidates = [(x0 - 1, y0), (x0 + 1, y0), (x0, y0 - 1), (x0, y0 + 1)]
-        return [self[p] for p in candidates if p in self]
+        return [self[p] for p in candidates if self[p] is not None]
 
     @property
     def width(self) -> int:
@@ -111,37 +201,162 @@ class Grid(object):
     def create_empty(width: int, height: int, default_value='.'):
         grid = Grid({(x, y): default_value for y, line in enumerate(range(height))
                      for x, _ in enumerate(range(width))}, default_value)
-        grid.default_value = default_value
 
         return grid
 
     @staticmethod
     def from_strings(strings: List[str], default_value='.'):
         grid = Grid({(x, y): val for y, line in enumerate(strings)
-                     for x, val in enumerate(line)})
-        grid.default_value = default_value
+                     for x, val in enumerate(line)}, default_value)
 
         return grid
 
     @staticmethod
     def from_number_strings(strings: List[str], default_value='.'):
         grid = Grid({(x, y): int(val) for y, line in enumerate(strings)
-                     for x, val in enumerate(line)})
-        grid.default_value = default_value
+                     for x, val in enumerate(line)}, default_value)
 
         return grid
 
     @staticmethod
     def from_array(rows: List[List[Union[any]]], default_value='.'):
         grid = Grid({(x, y): val for y, line in enumerate(rows)
-                     for x, val in enumerate(line)})
-        grid.default_value = default_value
+                     for x, val in enumerate(line)}, default_value)
 
         return grid
 
     @staticmethod
     def from_dict(grid_dict):
         grid = Grid(grid_dict)
+
+        grid._calculate_extents()
+
+        return grid
+
+
+class Grid3D(Grid):
+    grid = {}
+
+    extents: List[List[int]] = []
+
+    invert_y_display = False
+
+    default_value = '░░'
+
+    _key_base_type = Tuple[Union[int, float], Union[int, float], Union[int, float]]
+
+    def __getitem__(self, item: Union[Point3D, _key_base_type, slice]):
+        if isinstance(item, slice):
+            raise NotImplementedError
+        elif isinstance(item, Tuple):
+            return self.grid[Point3D(item[0], item[1], item[2])] if item in self.grid else None
+        elif isinstance(item, Point3D):
+            return self.grid[item] if item in self.grid else None
+        else:
+            raise TypeError('Invalid argument for grid indexing.')
+
+    def __setitem__(self, key: Union[Point3D, _key_base_type], value):
+        if isinstance(key, slice):
+            raise NotImplementedError
+        else:
+            if isinstance(key, tuple):
+                key = Point3D(key[0], key[1], key[2])
+
+            self.grid[key] = value
+
+        self._calculate_extents(key)
+
+    def __str__(self):
+        grid_str = ''
+
+        ex, ey, ez = self.extents
+
+        for y in range(ey[0], ey[1] + 1):
+            for z in range(ez[0], ez[1] + 1):
+                for x in range(ex[0], ex[1] + 1):
+                    grid_str += self.grid[(x, y, z)] if (x, y, z) in self.grid else self.default_value
+
+                grid_str += '  '
+            grid_str += '\n'
+
+        return grid_str
+
+    def neighbors(self, pos: Point):
+        x0, y0, z0 = pos
+
+        candidates = [
+            (x0 - 1, y0, z0),
+            (x0 + 1, y0, z0),
+            (x0, y0 - 1, z0),
+            (x0, y0 + 1, z0),
+            (x0, y0, z0 - 1),
+            (x0, y0, z0 + 1)
+        ]
+        return [self[p] for p in candidates if self[p] is not None]
+
+    @property
+    def width(self) -> int:
+        return self.extents[0][1] - self.extents[0][0] + 1
+
+    @property
+    def depth(self) -> int:
+        return self.extents[1][1] - self.extents[1][0] + 1
+
+    @property
+    def height(self) -> int:
+        return self.extents[2][1] - self.extents[2][0] + 1
+
+    def _calculate_extents(self, newest_key=None):
+        if not len(self.grid.keys()):
+            self.extents = [[0, 0], [0, 0], [0, 0]]
+            return
+
+        if self.extents and newest_key:
+            if newest_key[0] < self.extents[0][0]:
+                self.extents[0][0] = newest_key[0]
+            if newest_key[0] > self.extents[0][1]:
+                self.extents[0][1] = newest_key[0]
+
+            if newest_key[1] < self.extents[1][0]:
+                self.extents[1][0] = newest_key[1]
+            if newest_key[1] > self.extents[1][1]:
+                self.extents[1][1] = newest_key[1]
+
+            if newest_key[2] < self.extents[2][0]:
+                self.extents[2][0] = newest_key[2]
+            if newest_key[2] > self.extents[2][1]:
+                self.extents[2][1] = newest_key[2]
+
+            return
+
+        self.extents = [
+            [min([pos.x for pos in self.grid.keys()]), max([pos.x for pos in self.grid.keys()])],
+            [min([pos.y for pos in self.grid.keys()]), max([pos.y for pos in self.grid.keys()])],
+            [min([pos.z for pos in self.grid.keys()]), max([pos.z for pos in self.grid.keys()])]
+        ]
+
+    @staticmethod
+    def create_empty(width: int, depth: int, height: int, default_value='.'):
+        grid = Grid3D({}, default_value)
+        grid.default_value = default_value
+
+        return grid
+
+    @staticmethod
+    def from_strings(strings: List[str], default_value='.'):
+        raise NotImplementedError
+
+    @staticmethod
+    def from_number_strings(strings: List[str], default_value='.'):
+        raise NotImplementedError
+
+    @staticmethod
+    def from_array(rows: List[List[Union[any]]], default_value='.'):
+        raise NotImplementedError
+
+    @staticmethod
+    def from_dict(grid_dict, default_value='.'):
+        grid = Grid3D(grid_dict, default_value)
 
         grid._calculate_extents()
 
@@ -161,9 +376,9 @@ def get_line_intersection(a: Line, b: Line) -> Optional[Point]:
     print(u)
 
     if 0 <= t <= 1:
-        return x1 + t * (x2 - x1), y1 + t * (y2 - y1)
+        return Point(x1 + t * (x2 - x1), y1 + t * (y2 - y1))
     elif 0 <= u <= 1:
-        return x3 + u * (x4 - x3), y3 + t * (y4 - y3)
+        return Point(x3 + u * (x4 - x3), y3 + t * (y4 - y3))
     else:
         return None
 
