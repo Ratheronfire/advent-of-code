@@ -1,7 +1,8 @@
 import json
 import os
+import time
 from abc import abstractmethod
-from typing import List, Union
+from typing import List
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -56,6 +57,18 @@ class PuzzleBase(object):
                 self.should_strip_data
             )
 
+    def format_run_time(self, start_time: time, end_time: time):
+        delta = end_time - start_time
+
+        if delta < 1:
+            return f'{delta * 1000} milliseconds'
+        elif delta < 60:
+            return f'{delta} sec'
+        elif delta < 3600:
+            return f'{delta / 60} min'
+        else:
+            return f'{delta / 3600} hours'
+
     def test_answers(self, both_parts=True) -> (bool, str, str):
         answer_1 = ''
         answer_2 = ''
@@ -63,16 +76,26 @@ class PuzzleBase(object):
         part_1_correct = True
         part_2_correct = True
 
+        time_before = time.time()
+
         self.reset()
         self.prepare_data(self.sample_data.input_data, 1)
         answer_1 = self.get_day_1_answer(True)
         part_1_correct = answer_1 == self.sample_data.answer_1
 
+        time_after = time.time()
+        print(f'Part 1 test ran in {self.format_run_time(time_before, time_after)}.')
+
         if both_parts:
+            time_before = time.time()
+
             self.reset()
             self.prepare_data(self.sample_data.input_data_2, 2)
             answer_2 = self.get_day_2_answer(True)
             part_2_correct = answer_2 == self.sample_data.answer_2
+
+            time_after = time.time()
+            print(f'Part 2 test ran in {self.format_run_time(time_before, time_after)}.')
 
         return part_1_correct and part_2_correct, answer_1, answer_2
 
@@ -80,14 +103,24 @@ class PuzzleBase(object):
         answer_1 = ''
         answer_2 = ''
 
+        time_before = time.time()
+
         self.reset()
         self.prepare_data(self.input_data, 1)
         answer_1 = self.get_day_1_answer(False)
 
+        time_after = time.time()
+        print(f'Part 1 ran in {self.format_run_time(time_before, time_after)}.')
+
         if both_parts:
+            time_before = time.time()
+
             self.reset()
             self.prepare_data(self.input_data, 2)
             answer_2 = self.get_day_2_answer(False)
+
+            time_after = time.time()
+            print(f'Part 2 ran in {self.format_run_time(time_before, time_after)}.')
 
         return answer_1, answer_2
 

@@ -110,13 +110,13 @@
   },
   {
     "day": 19,
-    "input_data": "Blueprint 1:\n  Each ore robot costs 4 ore.\n  Each clay robot costs 2 ore.\n  Each obsidian robot costs 3 ore and 14 clay.\n  Each geode robot costs 2 ore and 7 obsidian.\n\nBlueprint 2:\n  Each ore robot costs 2 ore.\n  Each clay robot costs 3 ore.\n  Each obsidian robot costs 3 ore and 8 clay.\n  Each geode robot costs 3 ore and 12 obsidian.",
+    "input_data": "Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.\nBlueprint 2: Each ore robot costs 2 ore. Each clay robot costs 3 ore. Each obsidian robot costs 3 ore and 8 clay. Each geode robot costs 3 ore and 12 obsidian.",
     "answer_1": "33",
     "answer_2": ""
   },
   {
     "day": 20,
-    "input_data": "1\n2\n-3\n3\n-2\n0\n4",
+    "input_data": "0\n12\n0\n0\n0\n0\n0\n0",
     "answer_1": "3",
     "answer_2": ""
   },
