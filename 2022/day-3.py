@@ -53,5 +53,6 @@ class Puzzle(PuzzleBase):
         return ord(repeat) - (96 if repeat.islower() else 38)
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

@@ -119,5 +119,6 @@ class Puzzle(PuzzleBase):
         return grid_str
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

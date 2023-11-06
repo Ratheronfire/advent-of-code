@@ -78,6 +78,7 @@ class Puzzle(PuzzleBase):
         return functools.reduce(lambda a, b: a * b, [get_trees_visible(tree_value, n) for n in neighbors])
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())
 

@@ -133,5 +133,6 @@ class Puzzle(PuzzleBase):
         return str((distress_point[0] * 4000000) + distress_point[1])
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

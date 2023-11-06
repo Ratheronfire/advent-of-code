@@ -33,5 +33,6 @@ class Puzzle(PuzzleBase):
         return str(sum(self.elves[-3:]))
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

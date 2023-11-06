@@ -1,12 +1,12 @@
 import sys
 from typing import List, Tuple, Optional
 
+from helpers.grid import Grid, Grid
 from puzzle_base import PuzzleBase
 
 
 class Node(object):
-    x: int
-    y: int
+    pos: Tuple[int, int]
 
     elevation: int
     distance: int
@@ -17,25 +17,24 @@ class Node(object):
     is_start = False
     is_end = False
 
-    def __init__(self, x: int, y: int, elevation: int):
-        self.x = x
-        self.y = y
+    def __init__(self, pos: Tuple[int, int], elevation: int):
+        self.pos = pos
 
         self.elevation = elevation
         self.distance = sys.maxsize
 
     def __str__(self):
-        return '(%d, %d) - %d' % (self.x, self.y, self.elevation)
+        return '(%d, %d) - %d' % (self.pos[0], self.pos[1], self.elevation)
 
 
 class Map(object):
-    nodes: List[List[Node]]
+    nodes: Grid
 
     start_pos = (0, 0)
     end_pos = (0, 0)
 
     def __init__(self, map_data: List[str]):
-        self.nodes = []
+        self.nodes = {}
 
         for i in range(len(map_data)):
             line = map_data[i].strip()
@@ -169,30 +168,6 @@ class Puzzle(PuzzleBase):
 
         return True
 
-    def is_valid_start(self, coordinates):
-        start = self.map.get_node(coordinates[1], coordinates[0])
-
-        node_queue = [start]
-        visited_nodes = []
-
-        while len(node_queue):
-            node = node_queue.pop()
-            visited_nodes.append(node)
-
-            for movement in self.movements:
-                next_node_coords = (node.y + movement[0], node.x + movement[1])
-                next_node = self.map.get_node(next_node_coords[1], next_node_coords[0])
-
-                if not next_node or next_node in visited_nodes:
-                    continue
-
-                if next_node.elevation == 0:
-                    node_queue.append(next_node)
-                elif next_node.elevation == 1:
-                    return True
-
-        return False
-
     def retrace_path(self, goal_coords) -> int:
         current_node = self.map.get_node(goal_coords[0], goal_coords[1])
         goal_node = self.map.get_end_node()
@@ -235,5 +210,6 @@ class Puzzle(PuzzleBase):
         return str(min(path_lens))
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

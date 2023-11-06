@@ -117,5 +117,6 @@ class Puzzle(PuzzleBase):
         return str(self.get_score())
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

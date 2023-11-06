@@ -7,33 +7,35 @@
   },
   {
     "day": 2,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "2x3x4\n1x1x10",
+    "answer_1": "101",
+    "answer_2": "48"
   },
   {
     "day": 3,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "^v^v^v^v^v",
+    "answer_1": "2",
+    "answer_2": "11"
   },
   {
     "day": 4,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "pqrstuv",
+    "answer_1": "1048970",
+    "answer_2": "5714438"
   },
   {
     "day": 5,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "ugknbfddgicrmopn\naaa\njchzalrnumimnmhp\nhaegwjzuvuyypxyu\ndvszwmarrgswjxmb\n",
+    "input_data_2": "qjhvhtzxzqqjkmpb\nxxyxx\nuurcxstgmygtbstg\nieodomkazucvgmuy\n",
+    "answer_1": "2",
+    "answer_2": "2"
   },
   {
     "day": 6,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "turn on 0,0 through 999,999\ntoggle 0,0 through 999,0\nturn off 499,499 through 500,500",
+    "input_data_2": "turn on 0,0 through 0,0\ntoggle 0,0 through 999,999",
+    "answer_1": "998996",
+    "answer_2": "2000001"
   },
   {
     "day": 7,

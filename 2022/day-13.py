@@ -121,5 +121,6 @@ class Puzzle(PuzzleBase):
         return str(decoder_indices[0] * decoder_indices[1])
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

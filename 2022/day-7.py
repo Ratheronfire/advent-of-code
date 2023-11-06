@@ -85,5 +85,6 @@ class Puzzle(PuzzleBase):
         return total
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

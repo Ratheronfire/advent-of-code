@@ -77,5 +77,6 @@ class Puzzle(PuzzleBase):
         return [s[::-1] for s in stacks]
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

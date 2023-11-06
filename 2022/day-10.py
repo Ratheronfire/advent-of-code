@@ -66,5 +66,6 @@ class Puzzle(PuzzleBase):
         return crt_str.strip()
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

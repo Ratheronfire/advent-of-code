@@ -41,5 +41,6 @@ class Puzzle(PuzzleBase):
         return str(self.navigate_to_basement())
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())

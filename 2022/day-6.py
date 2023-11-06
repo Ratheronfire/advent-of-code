@@ -39,6 +39,7 @@ def get_message_start_point(input_line, unique_char_count):
         index += 1
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())
 

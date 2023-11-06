@@ -14,18 +14,18 @@ SOLID_TILE = '#'  # '██'
 
 BLOCKS = [
     Grid.from_array([[FALLING_TILE, FALLING_TILE, FALLING_TILE, FALLING_TILE]]),
-    Grid.from_array([[EMPTY_TILE,   FALLING_TILE, EMPTY_TILE],
-                     [FALLING_TILE, FALLING_TILE, FALLING_TILE],
-                     [EMPTY_TILE,   FALLING_TILE, EMPTY_TILE]]),
+    Grid.from_array([[EMPTY_TILE, FALLING_TILE, EMPTY_TILE],
+                       [FALLING_TILE, FALLING_TILE, FALLING_TILE],
+                       [EMPTY_TILE,   FALLING_TILE, EMPTY_TILE]]),
     Grid.from_array([[FALLING_TILE, FALLING_TILE, FALLING_TILE],
-                     [EMPTY_TILE,     EMPTY_TILE, FALLING_TILE],
-                     [EMPTY_TILE,     EMPTY_TILE, FALLING_TILE]]),
+                       [EMPTY_TILE,     EMPTY_TILE, FALLING_TILE],
+                       [EMPTY_TILE,     EMPTY_TILE, FALLING_TILE]]),
     Grid.from_array([[FALLING_TILE],
-                     [FALLING_TILE],
-                     [FALLING_TILE],
-                     [FALLING_TILE]]),
+                       [FALLING_TILE],
+                       [FALLING_TILE],
+                       [FALLING_TILE]]),
     Grid.from_array([[FALLING_TILE, FALLING_TILE],
-                     [FALLING_TILE, FALLING_TILE]])
+                       [FALLING_TILE, FALLING_TILE]])
 ]
 
 
@@ -196,5 +196,6 @@ class Puzzle(PuzzleBase):
         return str(lines_before + (total_blocks // interval) * lines_per_interval + lines_after)
 
 
-puzzle = Puzzle()
-print(puzzle.test_and_run())
+if __name__ == "__main__":
+    puzzle = Puzzle()
+    print(puzzle.test_and_run())
