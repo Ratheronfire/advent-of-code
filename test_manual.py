@@ -30,11 +30,12 @@ class Tester(object):
         spec.loader.exec_module(module)
 
         puzzle = module.Puzzle()
+        puzzle.input_data = self.args.test_input.split('\\n')
 
         puzzle.reset()
-        puzzle.prepare_data([self.args.test_input], self.args.part)
+        puzzle.prepare_data(puzzle.input_data, self.args.part)
 
-        if self.args.part == 1:
+        if self.args.part == "1":
             print(puzzle.get_day_1_answer())
         else:
             print(puzzle.get_day_2_answer())

@@ -39,9 +39,9 @@
   },
   {
     "day": 7,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "123 -> x\n456 -> y\nx AND y -> d\nx OR y -> e\nx LSHIFT 2 -> f\ny RSHIFT 2 -> g\nNOT x -> b\nNOT y -> i\nNOT b -> a\n",
+    "answer_1": "123",
+    "answer_2": "65412"
   },
   {
     "day": 8,
