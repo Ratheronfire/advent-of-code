@@ -45,15 +45,15 @@
   },
   {
     "day": 8,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "\"\"\n\"abc\"\n\"aaa\\\"aaa\"\n\"\\x27\"\n",
+    "answer_1": "12",
+    "answer_2": "19"
   },
   {
     "day": 9,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "London to Dublin = 464\nLondon to Belfast = 518\nDublin to Belfast = 141\n",
+    "answer_1": "605",
+    "answer_2": "982"
   },
   {
     "day": 10,
