@@ -161,10 +161,12 @@ class Grid:
             ]) for y in y_range
         ])
 
-    def neighbors(self, pos: Point):
+    def neighbors(self, pos: Point, include_diagonals=False):
         x0, y0 = pos
 
         candidates = [(x0 - 1, y0), (x0 + 1, y0), (x0, y0 - 1), (x0, y0 + 1)]
+        if include_diagonals:
+            candidates += [(x0 - 1, y0 - 1), (x0 - 1, y0 + 1), (x0 + 1, y0 - 1), (x0 + 1, y0 + 1)]
         return [self[p] for p in candidates if self[p] is not None]
 
     @property
