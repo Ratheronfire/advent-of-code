@@ -119,15 +119,15 @@
   },
   {
     "day": 20,
-    "input_data": "",
-    "answer_1": "",
+    "input_data": "28800",
+    "answer_1": "840",
     "answer_2": ""
   },
   {
     "day": 21,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "Hit Points: 100\nDamage: 7\nArmor: 2\n",
+    "answer_1": "71",
+    "answer_2": "133"
   },
   {
     "day": 22,
