@@ -167,7 +167,7 @@ class Grid:
         candidates = [(x0 - 1, y0), (x0 + 1, y0), (x0, y0 - 1), (x0, y0 + 1)]
         if include_diagonals:
             candidates += [(x0 - 1, y0 - 1), (x0 - 1, y0 + 1), (x0 + 1, y0 - 1), (x0 + 1, y0 + 1)]
-        return [self[p] for p in candidates if self[p] is not None]
+        return [(p, self[p]) for p in candidates if self[p] is not None]
 
     @property
     def width(self) -> int:

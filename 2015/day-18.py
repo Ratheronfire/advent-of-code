@@ -24,7 +24,7 @@ class Puzzle(PuzzleBase):
                 point = Point(x, y)
                 neighbors = self.grid.neighbors(point, True)
 
-                total_on = len([n for n in neighbors if n == '#'])
+                total_on = len([n for n in neighbors if n[1] == '#'])
 
                 state = self.grid[point]
 
