@@ -10,6 +10,8 @@ class Card:
     winning_numbers: list[int]
     found_numbers: list[int]
 
+    card_count = 1
+
     def __init__(self, id: int, winning_numbers, found_numbers):
         self.id = id
 
@@ -58,26 +60,13 @@ class Puzzle(PuzzleBase):
         return str(total)
 
     def get_day_2_answer(self, use_sample=False) -> str:
-        cards_owned = {card.id: 1 for card in self.cards}
+        for card in self.cards:
+            card_score = self.get_win_count(card)
 
-        current_card = self.cards[0]
-        card_score = self.get_win_count(current_card)
-        cards_owned[current_card.id] = 1
+            for i in range(card.id, card.id + card_score):
+                self.cards[i].card_count += card.card_count
 
-        while current_card is not None:
-            for i in range(current_card.id + 1, current_card.id + 1 + card_score):
-                if i in cards_owned:
-                    cards_owned[i] = cards_owned[i] + cards_owned[current_card.id]
-                else:
-                    cards_owned[i] = cards_owned[current_card.id]
-
-            if current_card.id < len(self.cards):
-                current_card = self.cards[current_card.id]
-                card_score = self.get_win_count(current_card)
-            else:
-                current_card = None
-
-        return str(sum(cards_owned.values()))
+        return str(sum([card.card_count for card in self.cards]))
 
 
 if __name__ == "__main__":
