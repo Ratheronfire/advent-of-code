@@ -18,22 +18,18 @@ class Puzzle(PuzzleBase):
 
     def reduce_to_number(self, json_segment, ignore_red=False) -> int:
         if isinstance(json_segment, int):
-            print(f'Found number: {json_segment}.')
             return json_segment
 
         if isinstance(json_segment, list):
             list_nums = [self.reduce_to_number(child, ignore_red) for child in json_segment]
-            print(f'Reduced list: {json.dumps(json_segment)} -> {sum(list_nums)}')
 
             return sum(list_nums)
 
         if isinstance(json_segment, dict):
             if ignore_red and "red" in json_segment.values():
-                print(f"Found red in {json.dumps(json_segment)}, ignoring this structure.")
                 return 0
 
             dict_nums = [self.reduce_to_number(child, ignore_red) for child in json_segment.values()]
-            print(f'Reduced dict: {json.dumps(json_segment)} -> {sum(dict_nums)}')
 
             return sum(dict_nums)
 

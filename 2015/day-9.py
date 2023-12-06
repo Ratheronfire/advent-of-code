@@ -1,6 +1,6 @@
 from typing import List
 
-from helpers.list_helpers import get_permutations
+from helpers.list_helpers import ListHelper
 from puzzle_base import PuzzleBase
 
 
@@ -51,13 +51,17 @@ class Puzzle(PuzzleBase):
         return total
 
     def get_day_1_answer(self, use_sample=False) -> str:
-        permutations = get_permutations([c.id for c in self.cities.values()])
+        list_helper = ListHelper()
+
+        permutations = list_helper.get_permutations([c.id for c in self.cities.values()])
         distances = [self.get_distance(p) for p in permutations]
 
         return str(min([d for d in distances if d >= 0]))
 
     def get_day_2_answer(self, use_sample=False) -> str:
-        permutations = get_permutations([c.id for c in self.cities.values()])
+        list_helper = ListHelper()
+
+        permutations = list_helper.get_permutations([c.id for c in self.cities.values()])
         distances = [self.get_distance(p) for p in permutations]
 
         return str(max([d for d in distances if d >= 0]))

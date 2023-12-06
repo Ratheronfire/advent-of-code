@@ -53,7 +53,7 @@ class Puzzle(PuzzleBase):
             i += 1
 
         out_str += '"'
-        print(f'{line} -> {out_str} ({len(line)} -> {len(out_str)})')
+        # print(f'{line} -> {out_str} ({len(line)} -> {len(out_str)})')
 
         return out_str
 

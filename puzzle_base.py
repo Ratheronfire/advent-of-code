@@ -69,7 +69,7 @@ class PuzzleBase(object):
         else:
             return f'{delta / 3600} hours'
 
-    def test_answers(self, both_parts=True) -> (bool, str, str):
+    def test_answers(self, both_parts=True, silent=False) -> (bool, str, str):
         answer_1 = ''
         answer_2 = ''
 
@@ -84,7 +84,10 @@ class PuzzleBase(object):
         part_1_correct = answer_1 == self.sample_data.answer_1
 
         time_after = time.time()
-        print(f'Part 1 test ran in {self.format_run_time(time_before, time_after)}.')
+        part_1_timespan = time_after - time_before
+
+        if not silent:
+            print(f'Part 1 test ran in {self.format_run_time(time_before, time_after)}.')
 
         if both_parts:
             time_before = time.time()
@@ -95,11 +98,16 @@ class PuzzleBase(object):
             part_2_correct = answer_2 == self.sample_data.answer_2
 
             time_after = time.time()
-            print(f'Part 2 test ran in {self.format_run_time(time_before, time_after)}.')
+            part_2_timespan = time_after - time_before
 
-        return part_1_correct and part_2_correct, answer_1, answer_2
+            if not silent:
+                print(f'Part 2 test ran in {self.format_run_time(time_before, time_after)}.')
+        else:
+            part_2_timespan = -1
 
-    def run(self, both_parts=True) -> (str, str):
+        return part_1_correct and part_2_correct, answer_1, answer_2, part_1_timespan, part_2_timespan
+
+    def run(self, both_parts=True, silent=False) -> (str, str):
         answer_1 = ''
         answer_2 = ''
 
@@ -110,7 +118,10 @@ class PuzzleBase(object):
         answer_1 = self.get_day_1_answer(False)
 
         time_after = time.time()
-        print(f'Part 1 ran in {self.format_run_time(time_before, time_after)}.')
+        part_1_timespan = time_after - time_before
+
+        if not silent:
+            print(f'Part 1 ran in {self.format_run_time(time_before, time_after)}.')
 
         if both_parts:
             time_before = time.time()
@@ -120,9 +131,14 @@ class PuzzleBase(object):
             answer_2 = self.get_day_2_answer(False)
 
             time_after = time.time()
-            print(f'Part 2 ran in {self.format_run_time(time_before, time_after)}.')
+            part_2_timespan = time_after - time_before
 
-        return answer_1, answer_2
+            if not silent:
+                print(f'Part 2 ran in {self.format_run_time(time_before, time_after)}.')
+        else:
+            part_2_timespan = -1
+
+        return answer_1, answer_2, part_1_timespan, part_2_timespan
 
     def test_and_run(self, both_parts=True) -> str:
         test_results = self.test_answers(both_parts)

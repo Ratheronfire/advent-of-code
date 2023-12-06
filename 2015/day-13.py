@@ -44,7 +44,6 @@ class Puzzle(PuzzleBase):
 
     def get_day_1_answer(self, use_sample=False) -> str:
         permutations = ListHelper().get_permutations(self.guests, True)
-        print(len(permutations))
         return str(max([self.get_happiness(permutation) for permutation in permutations]))
 
     def get_day_2_answer(self, use_sample=False) -> str:
@@ -54,7 +53,6 @@ class Puzzle(PuzzleBase):
         self.guests.append('You')
 
         permutations = ListHelper().get_permutations(self.guests, True)
-        print(len(permutations))
         return str(max([self.get_happiness(permutation) for permutation in permutations]))
 
 
