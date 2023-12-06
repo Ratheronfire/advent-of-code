@@ -80,7 +80,7 @@ class PuzzleBase(object):
 
         self.reset()
         self.prepare_data(self.sample_data.input_data, 1)
-        answer_1 = self.get_day_1_answer(True)
+        answer_1 = self.get_part_1_answer(True)
         part_1_correct = answer_1 == self.sample_data.answer_1
 
         time_after = time.time()
@@ -94,7 +94,7 @@ class PuzzleBase(object):
 
             self.reset()
             self.prepare_data(self.sample_data.input_data_2, 2)
-            answer_2 = self.get_day_2_answer(True)
+            answer_2 = self.get_part_2_answer(True)
             part_2_correct = answer_2 == self.sample_data.answer_2
 
             time_after = time.time()
@@ -115,7 +115,7 @@ class PuzzleBase(object):
 
         self.reset()
         self.prepare_data(self.input_data, 1)
-        answer_1 = self.get_day_1_answer(False)
+        answer_1 = self.get_part_1_answer(False)
 
         time_after = time.time()
         part_1_timespan = time_after - time_before
@@ -128,7 +128,7 @@ class PuzzleBase(object):
 
             self.reset()
             self.prepare_data(self.input_data, 2)
-            answer_2 = self.get_day_2_answer(False)
+            answer_2 = self.get_part_2_answer(False)
 
             time_after = time.time()
             part_2_timespan = time_after - time_before
@@ -174,9 +174,9 @@ class PuzzleBase(object):
         pass
 
     @abstractmethod
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         pass
 
     @abstractmethod
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         pass

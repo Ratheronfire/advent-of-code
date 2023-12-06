@@ -20,7 +20,7 @@ class Puzzle(PuzzleBase):
         key = (self.key + str(number)).encode()
         return md5(key).hexdigest()
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         i = 1
 
         while True:
@@ -33,7 +33,7 @@ class Puzzle(PuzzleBase):
 
         return str(i)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         i = 1
 
         while True:

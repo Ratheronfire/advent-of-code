@@ -23,7 +23,7 @@ class Puzzle(PuzzleBase):
             x, y, z = [int(num) for num in line.split(',')]
             self.grid[(x, y, z)] = '#'
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         surfaces = 0
 
         for point in self.grid.grid.keys():
@@ -31,7 +31,7 @@ class Puzzle(PuzzleBase):
 
         return str(surfaces)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         print(self.grid)
 
         surfaces = 0

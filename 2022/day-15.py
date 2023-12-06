@@ -97,7 +97,7 @@ class Puzzle(PuzzleBase):
             if not self.grid[point] or self.grid[point] == '░░':
                 self.unoccupied_tiles.add(point)
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         y_to_scan = 10 if use_sample else 2000000
 
         key_len = len(self.sensor_beacons.keys())
@@ -106,7 +106,7 @@ class Puzzle(PuzzleBase):
 
         return str(len(self.unoccupied_tiles))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         distress_point = (-1, -1)
 
         limit = 20 if use_sample else 4000000

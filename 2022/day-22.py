@@ -323,7 +323,7 @@ class Puzzle(PuzzleBase):
 
         return 1000 * (py + 1) + 4 * (px + 1) + FACING_MULTIPLIER[self.facing]
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         self.is_cube = False
         self.is_sample = use_sample
 
@@ -334,7 +334,7 @@ class Puzzle(PuzzleBase):
 
         return str(self.get_score())
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         self.is_cube = True
         self.is_sample = use_sample
 

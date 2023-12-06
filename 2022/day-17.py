@@ -154,12 +154,12 @@ class Puzzle(PuzzleBase):
 
         return self.top_line - lines_before
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         self.drop_blocks(2022)
 
         return str(self.top_line)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         total_blocks = 1000000000000
 
         interval = -1

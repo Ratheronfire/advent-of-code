@@ -82,13 +82,13 @@ class Puzzle(PuzzleBase):
 
         return total
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         for i in range(len(self.instructions)):
             self.do_instruction(self.instructions[i])
 
         return str(self.get_total_brightness())
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         for i in range(len(self.instructions)):
             self.do_instruction_2(self.instructions[i])
 

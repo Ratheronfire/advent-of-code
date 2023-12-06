@@ -46,12 +46,12 @@ class Puzzle(PuzzleBase):
 
         return found_sets
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         liters = 25 if use_sample else 150
 
         return str(len(self.find_filling_sets(tuple(self.containers), liters)))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         liters = 25 if use_sample else 150
 
         filling_sets = self.find_filling_sets(tuple(self.containers), liters)

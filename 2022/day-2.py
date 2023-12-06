@@ -45,10 +45,10 @@ class Puzzle(PuzzleBase):
                 elif output_score == 2:  # win
                     self.score += 6 + winning_play + 1
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.score)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(self.score)
 
 

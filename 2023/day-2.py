@@ -60,7 +60,7 @@ class Puzzle(PuzzleBase):
 
         return reduce(lambda a, b: a * b, max_set.values())
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         count = 0
         max_set = {'red': 12, 'green': 13, 'blue': 14}
 
@@ -70,7 +70,7 @@ class Puzzle(PuzzleBase):
 
         return str(count)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(sum([self.get_power(game) for game in self.games]))
 
 

@@ -35,7 +35,7 @@ class Puzzle(PuzzleBase):
         return (int(num_str) if num_str.isnumeric() else -1), \
             [n for n in neighbors if not n[1].isnumeric() and n[1] != '.']
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         total = 0
 
         for y in range(self.schematic.extents[1][1] + 1):
@@ -53,7 +53,7 @@ class Puzzle(PuzzleBase):
 
         return str(total)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         part_adjacencies = {}
 
         for y in range(self.schematic.extents[1][1] + 1):

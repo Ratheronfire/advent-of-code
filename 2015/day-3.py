@@ -53,13 +53,13 @@ class Puzzle(PuzzleBase):
 
         self.grid[(x, y)] = movement
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         for i in range(len(self.movements)):
             self.move(i, False)
 
         return str(self.houses_visited)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         for i in range(len(self.movements)):
             self.move(i, i % 2 == 1)
 

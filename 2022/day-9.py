@@ -47,11 +47,11 @@ class Puzzle(PuzzleBase):
             move = line.split(' ')
             self.moves.append((move[0], int(move[1])))
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         self.perform_moves()
         return str(len(self.tiles_visited))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         self.perform_moves()
         return str(len(self.tiles_visited))
 

@@ -229,7 +229,7 @@ class Puzzle(PuzzleBase):
 
             return max_possible_score
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         self.precalculate_room_traversals()
 
         starting_room = self.rooms['AA']
@@ -238,7 +238,7 @@ class Puzzle(PuzzleBase):
 
         return str(best_score)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         self.precalculate_room_traversals()
 
         starting_rooms = [self.rooms['AA'], self.rooms['AA']]

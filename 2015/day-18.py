@@ -43,13 +43,13 @@ class Puzzle(PuzzleBase):
         self.grid[(self.grid.width - 1, 0)] = '#'
         self.grid[(self.grid.width - 1, self.grid.height - 1)] = '#'
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         for i in range(100):
             self.step()
 
         return str(len([p for p in self.grid.grid.keys() if self.grid[p] == '#']))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         for i in range(100):
             self.lock_corners()
             self.step()

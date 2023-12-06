@@ -57,7 +57,7 @@ class Puzzle(PuzzleBase):
             box = Box(int(dimensions[0]), int(dimensions[1]), int(dimensions[2]))
             self.boxes.append(box)
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         total_feet = 0
         for box in self.boxes:
             smallest = box.smallest_sides
@@ -65,7 +65,7 @@ class Puzzle(PuzzleBase):
 
         return str(total_feet)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         total_feet = 0
         for box in self.boxes:
             smallest = box.smallest_sides

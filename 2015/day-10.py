@@ -30,7 +30,7 @@ class Puzzle(PuzzleBase):
 
         return output
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         input = self.base_input
 
         for i in range(40):
@@ -38,7 +38,7 @@ class Puzzle(PuzzleBase):
 
         return str(len(input))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         input = self.base_input
 
         for i in range(50):

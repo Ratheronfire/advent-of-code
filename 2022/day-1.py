@@ -26,10 +26,10 @@ class Puzzle(PuzzleBase):
 
         self.elves = sorted(self.elves)
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.elves[-1])
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(sum(self.elves[-3:]))
 
 

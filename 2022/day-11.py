@@ -110,10 +110,10 @@ class Puzzle(PuzzleBase):
         sorted_monkeys = sorted(self.monkeys, key=lambda m: m.inspect_count, reverse=True)
         return sorted_monkeys[0].inspect_count * sorted_monkeys[1].inspect_count
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.get_score())
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(self.get_score())
 
 

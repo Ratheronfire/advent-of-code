@@ -32,7 +32,7 @@ class Puzzle(PuzzleBase):
             if input_data[i].strip() != '':
                 self.trees.append([int(char) for char in input_data[i].strip()])
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         visible_trees = []
 
         for i in range(len(self.trees)):
@@ -42,7 +42,7 @@ class Puzzle(PuzzleBase):
 
         return str(len(visible_trees))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         scenic_scores = []
 
         for i in range(len(self.trees)):

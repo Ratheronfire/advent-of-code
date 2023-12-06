@@ -151,10 +151,10 @@ class Puzzle(PuzzleBase):
         else:
             return left_monkey.value / right_monkey.value
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(int(self.get_monkey_value('root')))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         self.monkeys['humn'].value = ['x']
 
         solution = int(self.parse_tree('root'))

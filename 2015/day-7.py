@@ -166,10 +166,10 @@ class Puzzle(PuzzleBase):
 
         return value
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.get_value_on_wire('a'))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         a_value = self.get_value_on_wire('a')
 
         print('\n=====\nResetting mid-part 2.\n=====\n')

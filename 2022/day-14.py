@@ -92,10 +92,10 @@ class Puzzle(PuzzleBase):
 
         return sand_collected
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.simulate_sand(False))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(self.simulate_sand(True))
 
 

@@ -14,10 +14,10 @@ class Puzzle(PuzzleBase):
         self.build_fs(input_data)
         self.calc_dir_size(self.fs['/'], '/')
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(sum([self.dir_sizes[d] for d in self.dir_sizes if self.dir_sizes[d] <= 100000]))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         free_space = 70000000 - self.dir_sizes['/']
         candidate_folders = [(d, self.dir_sizes[d]) for d in self.dir_sizes if free_space + self.dir_sizes[d] >= 30000000]
         candidate_folders = sorted(candidate_folders, key=lambda f: f[1])

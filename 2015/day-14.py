@@ -51,13 +51,13 @@ class Puzzle(PuzzleBase):
 
         return periods * reindeer.period_distnace + reindeer.speed * min(period_remainder, reindeer.fly_time)
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         seconds = 1000 if use_sample else 2503
         distances = [self.get_reindeer_distance(reindeer, seconds) for reindeer in self.reindeer]
 
         return str(max(distances))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         seconds = 1000 if use_sample else 2503
 
         scores = {reindeer.name: 0 for reindeer in self.reindeer}

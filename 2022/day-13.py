@@ -96,7 +96,7 @@ class Puzzle(PuzzleBase):
 
         return 1
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         good_packets = []
 
         for i in range(0, len(self.packets), 2):
@@ -108,7 +108,7 @@ class Puzzle(PuzzleBase):
 
         return str(sum(good_packets))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         decoder_keys = ([[2]], [[6]])
 
         self.packets.append(decoder_keys[0])

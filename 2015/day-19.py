@@ -131,10 +131,10 @@ class Puzzle(PuzzleBase):
     def get_molecule_atoms(self, molecule_str: str) -> Molecule:
         return tuple([str(m) for m in re.split(r'(e|[A-Z][a-z]*)', molecule_str) if m != ''])
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(len(self.get_replacements()))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(len(self.find_shortest_reduction(
             self.get_molecule_atoms(self.base_str),
             self.get_molecule_atoms('e'))))

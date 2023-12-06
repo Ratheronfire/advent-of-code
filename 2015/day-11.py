@@ -55,10 +55,10 @@ class Puzzle(PuzzleBase):
 
         return password
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return self.get_next_password(self.start_password)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         password = self.get_next_password(self.start_password)
         password = self.increment(password)
 

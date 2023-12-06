@@ -48,7 +48,7 @@ class Puzzle(PuzzleBase):
     def get_win_count(self, card: Card):
         return len([n for n in card.found_numbers if n in card.winning_numbers])
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         total = 0
 
         for card in self.cards:
@@ -59,7 +59,7 @@ class Puzzle(PuzzleBase):
 
         return str(total)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         for card in self.cards:
             card_score = self.get_win_count(card)
 

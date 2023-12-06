@@ -110,11 +110,11 @@ class Puzzle(PuzzleBase):
 
         return candidate_sues
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         sue = self.find_candidates()[0]
         return str(sue.id)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         sue = self.find_candidates_part2()[0]
         return str(sue.id)
 

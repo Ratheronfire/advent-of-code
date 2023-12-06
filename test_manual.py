@@ -36,9 +36,9 @@ class Tester(object):
         puzzle.prepare_data(puzzle.input_data, self.args.part)
 
         if self.args.part == "1":
-            print(puzzle.get_day_1_answer())
+            print(puzzle.get_part_1_answer())
         else:
-            print(puzzle.get_day_2_answer())
+            print(puzzle.get_part_2_answer())
 
 
 if __name__ == "__main__":

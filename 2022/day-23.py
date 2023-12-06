@@ -78,7 +78,7 @@ class Puzzle(PuzzleBase):
 
         self.movements = self.movements[1:] + [self.movements[0]]
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         for _ in range(10):
             self.select_movements()
             self.commit_movements()
@@ -92,7 +92,7 @@ class Puzzle(PuzzleBase):
 
         return str(area - len(filled_tiles))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         finished = False
         i = 0
         while not finished:

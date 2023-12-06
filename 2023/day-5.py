@@ -108,10 +108,10 @@ class Puzzle(PuzzleBase):
 
         return min(destinations)
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(min([self.convert_to_location(seed) for seed in self.base_seeds]))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         seed_pairs = [(self.base_seeds[i], self.base_seeds[i+1]) for i in range(0, len(self.base_seeds), 2)]
         seed_pairs = sorted(seed_pairs, key=lambda seed: seed[0])
 

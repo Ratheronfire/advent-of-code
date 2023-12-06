@@ -105,10 +105,10 @@ class Puzzle(PuzzleBase):
     def calculate_score(self, target_calories=False):
         return self.get_highest_score([(i, None) for i in self.ingredients], 100, target_calories)
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.calculate_score(False))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(self.calculate_score(True))
 
 

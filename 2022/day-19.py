@@ -209,7 +209,7 @@ class Puzzle(PuzzleBase):
                              ore_robots, clay_robots, obsidian_robots, geode_robots)] = max_geodes
         return max_geodes
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         scores = []
         for blueprint in self.blueprints:
             self.decision_cache = {}
@@ -218,7 +218,7 @@ class Puzzle(PuzzleBase):
         print(scores)
         return str(sum([(i + 1) * scores[i] for i in range(len(scores))]))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return ''
 
 

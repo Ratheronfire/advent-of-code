@@ -184,14 +184,14 @@ class Puzzle(PuzzleBase):
 
         return path_len
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         self.calc_path()
 
         path_len = self.retrace_path(self.map.start_pos)
 
         return str(path_len)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         self.calc_path()
 
         a_candidates = []

@@ -50,7 +50,7 @@ class Puzzle(PuzzleBase):
 
         return total
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         list_helper = ListHelper()
 
         permutations = list_helper.get_permutations([c.id for c in self.cities.values()])
@@ -58,7 +58,7 @@ class Puzzle(PuzzleBase):
 
         return str(min([d for d in distances if d >= 0]))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         list_helper = ListHelper()
 
         permutations = list_helper.get_permutations([c.id for c in self.cities.values()])

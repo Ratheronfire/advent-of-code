@@ -35,10 +35,10 @@ class Puzzle(PuzzleBase):
 
         return 0
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.reduce_to_number(self.json_data, False))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(self.reduce_to_number(self.json_data, True))
 
 

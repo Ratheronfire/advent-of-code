@@ -33,7 +33,7 @@ class Puzzle(PuzzleBase):
 
         return True
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         i = 0#int(self.present_count / 60)
         presents = self.presents_at_house(i)
 
@@ -56,7 +56,7 @@ class Puzzle(PuzzleBase):
 
         return str(i)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return ''
 
 

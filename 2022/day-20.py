@@ -42,7 +42,7 @@ class Puzzle(PuzzleBase):
             self.numbers.insert(new_index, number_tuple)
             self.numbers = self.numbers[:current_index] + self.numbers[current_index + 1:]
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         self.mix()
 
         coordinates = self.numbers[(self.zero_index + 1000) % len(self.numbers)][0] + \
@@ -50,7 +50,7 @@ class Puzzle(PuzzleBase):
                       self.numbers[(self.zero_index + 3000) % len(self.numbers)][0]
         return str(coordinates)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return ''
 
 

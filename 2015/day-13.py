@@ -42,11 +42,11 @@ class Puzzle(PuzzleBase):
 
         return total
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         permutations = ListHelper().get_permutations(self.guests, True)
         return str(max([self.get_happiness(permutation) for permutation in permutations]))
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         for guest in self.guests:
             self.happiness_pairs[(guest, 'You')] = 0
             self.happiness_pairs[('You', guest)] = 0

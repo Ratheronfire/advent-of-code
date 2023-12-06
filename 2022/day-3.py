@@ -35,10 +35,10 @@ class Puzzle(PuzzleBase):
                 self.group_total += self.get_matching_item_priority(self.group)
                 self.group = []
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.total)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(self.group_total)
 
     @staticmethod

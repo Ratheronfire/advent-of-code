@@ -166,7 +166,7 @@ class Puzzle(PuzzleBase):
 
         return weapon_permutations, armor_permutations, ring_permutations
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         weapon_permutations, armor_permutations, ring_permutations = self.get_loadout_permutations()
         cheapest_loadout = sys.maxsize
 
@@ -192,7 +192,7 @@ class Puzzle(PuzzleBase):
 
         return str(cheapest_loadout)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         weapon_permutations, armor_permutations, ring_permutations = self.get_loadout_permutations()
         highest_loadout = 0
 

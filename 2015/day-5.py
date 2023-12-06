@@ -43,11 +43,11 @@ class Puzzle(PuzzleBase):
 
         return repeat_pair_found and spaced_pair_found
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         nice_lines = len([line for line in self.lines if self.is_nice(line)])
         return str(nice_lines)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         nice_lines = len([line for line in self.lines if self.is_nice_2(line)])
         return str(nice_lines)
 

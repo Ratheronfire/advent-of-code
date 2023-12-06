@@ -56,10 +56,10 @@ class Puzzle(PuzzleBase):
                 self.stacks[first] = self.stacks[first][:-count]
                 self.stacks[second] += chars
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return ''.join([s[-1] for s in self.stacks])
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return ''.join([s[-1] for s in self.stacks])
 
     @staticmethod

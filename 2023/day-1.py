@@ -58,7 +58,7 @@ class Puzzle(PuzzleBase):
 
         return int(first + last)
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         sum = 0
 
         for line in self.lines:
@@ -68,7 +68,7 @@ class Puzzle(PuzzleBase):
 
         return str(sum)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         sum = 0
 
         for line in self.lines:

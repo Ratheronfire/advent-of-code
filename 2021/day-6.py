@@ -16,10 +16,10 @@ class Puzzle(PuzzleBase):
         for i in range(len(input_data)):
             line = input_data[i]
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return ''
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return ''
 
 

@@ -30,10 +30,10 @@ class Puzzle(PuzzleBase):
             if ranges[1][0] <= ranges[0][0] <= ranges[1][1] or ranges[0][0] <= ranges[1][0] <= ranges[0][1]:
                 self.overlap_pairs += 1
 
-    def get_day_1_answer(self, use_sample=False) -> str:
+    def get_part_1_answer(self, use_sample=False) -> str:
         return str(self.redundant_pairs)
 
-    def get_day_2_answer(self, use_sample=False) -> str:
+    def get_part_2_answer(self, use_sample=False) -> str:
         return str(self.overlap_pairs)
 
 
