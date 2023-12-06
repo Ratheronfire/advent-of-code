@@ -32,9 +32,9 @@
   },
   {
     "day": 6,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "Time:      7  15   30\nDistance:  9  40  200\n",
+    "answer_1": "288",
+    "answer_2": "71503"
   },
   {
     "day": 7,
