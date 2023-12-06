@@ -87,7 +87,14 @@ class Puzzle(PuzzleBase):
         destinations = []
 
         if vertex_min == vertex_max:
-            destinations.append(self.convert_to_category(category, next_category, vertex_min))
+            while next_category != CATEGORIES[-1]:
+                vertex_min = self.convert_to_category(category, next_category, vertex_min)
+
+                category_index += 1
+                category = next_category
+                next_category = CATEGORIES[category_index + 1]
+
+                return vertex_min
         else:
             next_vertices = set()
             next_vertices.add(vertex_min)
