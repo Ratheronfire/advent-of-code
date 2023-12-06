@@ -1,3 +1,4 @@
+import math
 from functools import reduce
 from typing import List
 
@@ -45,11 +46,24 @@ class Puzzle(PuzzleBase):
 
         return j - i + 1
 
+    def calculate_quadratic_roots(self, race):
+        # winning times: (race.time - seconds_held) * seconds_held > race.distance
+        # -(seconds_held ** 2) + race.time * seconds_held - race.distance = 0
+        # a == -1                b == race.time             c == -race.distance
+        a = -1
+        b = race.time
+        c = -race.distance
+
+        root_portion = math.sqrt(b ** 2 - 4*a*c)
+
+        return (math.ceil((-b - root_portion) / (2 * a)) - 1) - \
+            (math.floor((-b + root_portion) / (2 * a)) + 1) + 1
+
     def get_part_1_answer(self, use_sample=False) -> str:
-        return str(reduce(lambda a, b: a * b, [self.get_winning_range(race) for race in self.races]))
+        return str(reduce(lambda a, b: a * b, [self.calculate_quadratic_roots(race) for race in self.races]))
 
     def get_part_2_answer(self, use_sample=False) -> str:
-        return str(self.get_winning_range(self.races[0]))
+        return str(self.calculate_quadratic_roots(self.races[0]))
 
 
 if __name__ == "__main__":

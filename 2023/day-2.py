@@ -45,7 +45,6 @@ class Puzzle(PuzzleBase):
         for cube_set in game:
             for color in cube_set.keys():
                 if cube_set[color] > max_set[color]:
-                    print(f'Impossible set: {str(cube_set)} ({cube_set[color]} > {max_set[color]})')
                     return False
 
         return True
