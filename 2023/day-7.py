@@ -54,47 +54,19 @@ class Hand:
         j_count = self.cards.count('J')
         unique_cards = set([c for c in self.cards if c != 'J'])
 
-        # possible outcomes:
-        # 5 Js:
-        #   Any output is possible, so 5 of a kind (6)
-        # 4 Js:
-        #   All Js can match the other card, so 5 of a kind (6)
-        # 3 Js:
-        #   If remaining two cards are same, 5 of a kind (6)
-        #   Otherwise: 4 of a kind (5)
-        # 2 Js:
-        #   If remaining three cards are same, 5 of a kind (6)
-        #   If two are the same, 4 of a kind (5)
-        #   If all different, 3 of a kind (3)
-        # 1 J:
-        #   If remaining four cards are same, 5 of a kind (6)
-        #   If three are the same, 4 of a kind (5)
-        #   If two matching pairs, Full house (4)
-        #   If one matching pair: Three of a kind (3)
-        #   If all different, One pair (1)
-
         if j_count == 0:
             return self.get_hand_type()
-        elif j_count == 5 or j_count == 4 or len(unique_cards) == 1:
+        elif j_count > 3 or len(unique_cards) == 1:
             return 6
         elif j_count == 3:
-            return 6 if len(unique_cards) == 1 else 5
+            return 5
         elif j_count == 2:
-            if len(unique_cards) == 1:
-                return 6
-            elif len(unique_cards) == 2:
-                return 5
-            else:
-                return 3
+            return 5 if len(unique_cards) == 2 else 3
         else:
-            if len(unique_cards) == 1:
-                return 6
-            elif len(unique_cards) == 2:
+            if len(unique_cards) == 2:
                 return 5 if any([self.cards.count(c) == 3 for c in unique_cards]) else 4
-            elif len(unique_cards) == 3:
-                return 3
             else:
-                return 1
+                return 3 if len(unique_cards) == 3 else 1
 
     def __str__(self):
         return f'{self.cards} ({HAND_VALUES[self.get_hand_type()]}; numeric value={self.get_numeric_value()})'
