@@ -43,12 +43,10 @@ class Hand:
             return 3
         elif len(unique_cards) == 3 and len([c for c in unique_cards if self.cards.count(c) == 2]) == 2:
             return 2
-        elif len(unique_cards) == 4 and any([self.cards.count(c) == 2 for c in unique_cards]):
+        elif len(unique_cards) == 4:
             return 1
-        elif len(unique_cards) == 5:
+        else:
             return 0
-
-        return -1
 
     def get_hand_type_p2(self):
         j_count = self.cards.count('J')
