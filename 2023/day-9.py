@@ -18,8 +18,8 @@ class Puzzle(PuzzleBase):
             if line != '':
                 self.value_sets.append([int(i) for i in line.split()])
 
-    def get_next_value(self, value_set: list[int], forwards=True):
-        edge_values = [value_set[-1 if forwards else 0]]
+    def get_next_value(self, value_set: list[int]):
+        edge_values = [value_set[-1]]
 
         derivative_values = []
 
@@ -30,23 +30,15 @@ class Puzzle(PuzzleBase):
             value_set = derivative_values.copy()
             derivative_values = []
 
-            edge_values.append(value_set[-1 if forwards else 0])
+            edge_values.append(value_set[-1])
 
-        if forwards:
-            return sum(edge_values)
-        else:
-            num = 0
-            edge_values.reverse()
-            for edge_value in edge_values:
-                num = edge_value - num
-
-            return num
+        return sum(edge_values)
 
     def get_part_1_answer(self, use_sample=False) -> str:
-        return str(sum([self.get_next_value(v, True) for v in self.value_sets]))
+        return str(sum([self.get_next_value(v) for v in self.value_sets]))
 
     def get_part_2_answer(self, use_sample=False) -> str:
-        return str(sum([self.get_next_value(v, False) for v in self.value_sets]))
+        return str(sum([self.get_next_value(v[::-1]) for v in self.value_sets]))
 
 
 if __name__ == "__main__":
