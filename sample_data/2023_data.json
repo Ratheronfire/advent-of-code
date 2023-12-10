@@ -57,9 +57,10 @@
   },
   {
     "day": 10,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "7-F7-\n.FJ|7\nSJLL7\n|F--J\nLJ.LJ\n",
+    "input_data_2": "...........\n.S-------7.\n.|F-----7|.\n.||.....||.\n.||.....||.\n.|L-7.F-J|.\n.|..|.|..|.\n.L--J.L--J.\n...........\n",
+    "answer_1": "8",
+    "answer_2": "4"
   },
   {
     "day": 11,
