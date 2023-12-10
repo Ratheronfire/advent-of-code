@@ -45,6 +45,9 @@ class Point:
     def __sub__(self, other):
         return Point(self.x - other[0], self.y - other[1])
 
+    def __mul__(self, scalar: int):
+        return Point(self.x * scalar, self.y * scalar)
+
 
 class Point3D(Point):
     z: Union[int, float]
