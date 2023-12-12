@@ -162,78 +162,6 @@ class Puzzle(PuzzleBase):
 
         self.loop = [l for l in loop_segments]
 
-    def is_point_outside(self, point):
-        next_point = point
-
-        for direction in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
-            while self.grid[next_point] == '.':
-                next_point = (next_point[0] + direction[0], next_point[1] + direction[1])
-
-            if self.grid[next_point] is None:
-                return True  # this point is outside the extents, therefore it's the edge
-            # if we got here, we must have hit a pipe
-
-        # check failed in all four directions
-        return False
-
-    def check_side(self, x, y, side_checks, found_out_side, is_lefthand):
-        is_out_side = False
-
-        for check in side_checks:
-            cx, cy = check
-            edge = (x + cx, y + cy)
-
-            if self.grid[edge] == '.':
-                if not found_out_side:
-                    is_out_side = self.is_point_outside(edge)
-                self.grid[edge] = 'A' if is_lefthand else 'B'
-
-        return is_out_side
-
-    def scan_loop_edges(self):
-        x, y = [pos for pos in self.grid.grid if self.grid[pos] == 'S'][0]
-
-        loop_segments = set()
-        loop_segments.add((x, y))
-
-        loop_finished = False
-
-        found_out_side = False
-        a_is_outside = False
-
-        while not loop_finished:
-            pipe_neighbors = self.get_pipe_neighbors(Point(x, y))
-
-            new_neighbors = [n for n in pipe_neighbors if n not in loop_segments]
-            if len(new_neighbors):
-                direction = (new_neighbors[0][0] - x, new_neighbors[0][1] - y)
-
-                if self.grid[(x, y)] == 'S':
-                    pipe = self.get_start_replacement()
-                else:
-                    pipe = self.grid[(x, y)]
-
-                side_checks = LOOP_SIDES[(pipe, direction)]
-
-                left_is_out = self.check_side(x, y, side_checks[0], found_out_side, True)
-                right_is_out = self.check_side(x, y, side_checks[1], found_out_side, False)
-
-                if not found_out_side and left_is_out:
-                    a_is_outside = True
-                    found_out_side = True
-                if not found_out_side and right_is_out:
-                    a_is_outside = False
-                    found_out_side = True
-
-                x, y = new_neighbors[0]
-            else:
-                loop_finished = True
-
-            for neighbor in pipe_neighbors:
-                loop_segments.add(neighbor)
-
-        return a_is_outside
-
     def isolate_loop(self):
         for x in range(self.grid.extents[0][1] + 1):
             for y in range(self.grid.extents[1][1] + 1):
@@ -252,29 +180,30 @@ class Puzzle(PuzzleBase):
 
         print('\n' + str(grid_copy))
 
-    def flood_fill(self, char_to_target):
-        univisited_points = [p for p in self.grid.grid if self.grid[p] == char_to_target]
-        point_queue = []
+    def scan_for_inner_points(self):
+        total = 0
+        is_inner = False
+        last_pipe = ''
 
-        while len(univisited_points):
-            point_queue.append(univisited_points[0])
+        for y in range(self.grid.extents[1][1] + 1):
+            for x in range(self.grid.extents[0][1] + 1):
+                tile = self.grid[(x, y)]
 
-            while len(point_queue):
-                x, y = point = point_queue.pop()
+                if tile in '|L7JF':
+                    if last_pipe + tile not in ['L7', 'FJ']:
+                        is_inner = not is_inner
 
-                if point in univisited_points:
-                    univisited_points.remove(point)
+                    last_pipe = tile
 
-                for neighbor in self.grid.neighbors((x, y)):
-                    nx, ny = neighbor[0]
-                    neighbor_val = self.grid[neighbor[0]]
+                # if tile == self.grid.default_value:
+                #     self.grid[(x, y)] = 'I' if is_inner else 'O'
 
-                    if neighbor_val != char_to_target and neighbor_val != self.grid.default_value:
-                        continue
+                if is_inner and tile == self.grid.default_value:
+                    total += 1
 
-                    if (nx, ny) in univisited_points or neighbor_val == self.grid.default_value:
-                        self.grid[neighbor[0]] = char_to_target
-                        point_queue.append((nx, ny))
+            is_inner = False
+
+        return total
 
     def get_part_1_answer(self, use_sample=False) -> str:
         self.locate_loop()
@@ -285,14 +214,10 @@ class Puzzle(PuzzleBase):
         self.locate_loop()
         self.isolate_loop()
 
-        a_is_outside = self.scan_loop_edges()
+        start_pos = [pos for pos in self.grid.grid if self.grid[pos] == 'S'][0]
+        self.grid[start_pos] = self.get_start_replacement()
 
-        self.flood_fill('A')
-        self.flood_fill('B')
-
-        matching_char = 'B' if a_is_outside else 'A'
-
-        return str(len([p for p in self.grid.grid if self.grid[p] == matching_char]))
+        return str(self.scan_for_inner_points())
 
 
 if __name__ == "__main__":
