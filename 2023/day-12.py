@@ -4,57 +4,44 @@ from typing import List
 from puzzle_base import PuzzleBase
 
 
-GearRow = tuple[list[str], list[int]]
+class GearRow:
+    def __init__(self, gears: list[str], runs: list[int]):
+        self.gears = gears
+        self.runs = runs
 
+    def __str__(self):
+        return f'{self.gears} {self.runs}'
 
-class Puzzle(PuzzleBase):
-    year = 2023
-    day = 12
+    def get_row_margin(self):
+        return len(self.gears) - sum(self.runs) - (len(self.runs) - 1)
 
-    gear_rows: list[GearRow]
-
-    def reset(self):
-        self.gear_rows = []
-
-    def prepare_data(self, input_data: List[str], current_part: int):
-        for i in range(len(input_data)):
-            line = input_data[i]
-
-            if line == '':
-                continue
-
-            gears, broken_runs = line.split()
-            self.gear_rows.append((
-                [g for g in gears],
-                [int(r) for r in broken_runs.split(',')]
-            ))
-
-    def get_row_margin(self, gear_row: GearRow):
-        return len(gear_row[0]) - sum(gear_row[1]) - (len(gear_row[1]) - 1)
-
-    def simplify_row(self, gear_row: GearRow) -> GearRow:
+    def simplify(self):
         possible_regions = []
         current_region = []
 
-        run_lengths: list[int] = gear_row[1].copy()
+        run_lengths: list[int] = self.runs.copy()
 
         # finding any runs that are constrained by the row size
         # if a run's min/max positions overlap, the overlap area must be marked
-        row_margin = self.get_row_margin(gear_row)
+        row_margin = self.get_row_margin()
 
         offset = 0
 
         if row_margin == 0:
-            return [], []  # Only one possible solution, so no need to think about this one
+            # Only one possible solution, so no need to think about this one
+            self.gears = []
+            self.runs = []
 
-        for run in gear_row[1]:
+            return
+
+        for run in self.runs:
             if run >= row_margin:
                 for i in range(row_margin + offset, run + offset):
-                    gear_row[0][i] = '#'
+                    self.gears[i] = '#'
             offset += run + 1
 
         # splitting the gear array on operational gears
-        gears = gear_row[0].copy()
+        gears = self.gears.copy()
         gears.append('.')
 
         for gear in gears:
@@ -97,15 +84,16 @@ class Puzzle(PuzzleBase):
         for region in possible_regions:
             simplified_gears += ['.'] + region
 
-        return simplified_gears[1:], run_lengths
+        self.gears = simplified_gears[1:]
+        self.runs = run_lengths
 
-    def is_row_valid(self, gear_row: GearRow) -> bool:
+    def is_valid(self) -> bool:
         current_run = 0
 
-        gears = gear_row[0].copy()
+        gears = self.gears.copy()
         gears.append('.')  # padding to make testing at the edge easier
 
-        runs_to_test = gear_row[1]
+        runs_to_test = self.runs.copy()
 
         for i, gear in enumerate(gears):
             if gear == '#':
@@ -125,23 +113,46 @@ class Puzzle(PuzzleBase):
 
         return False
 
+
+class Puzzle(PuzzleBase):
+    year = 2023
+    day = 12
+
+    gear_rows: list[GearRow]
+
+    def reset(self):
+        self.gear_rows = []
+
+    def prepare_data(self, input_data: List[str], current_part: int):
+        for i in range(len(input_data)):
+            line = input_data[i]
+
+            if line == '':
+                continue
+
+            gears, broken_runs = line.split()
+            self.gear_rows.append(GearRow(
+                [g for g in gears],
+                [int(r) for r in broken_runs.split(',')]
+            ))
+
     def get_working_permutations(self, gear_row: GearRow):
-        if not len(gear_row[1]):
+        if not len(gear_row.runs):
             return 1  # this row is already satisfied
 
-        if '?' not in gear_row[0]:
-            # print(''.join(gear_row[0]), gear_row[1], f' - Is Valid: {self.is_row_valid(gear_row)}')
-            return int(self.is_row_valid(gear_row))
+        if '?' not in gear_row.gears:
+            # print(''.join(gear_row.gears), gear_row.runs, f' - Is Valid: {self.is_row_valid(gear_row)}')
+            return int(gear_row.is_valid())
         else:
-            next_unknown = gear_row[0].index('?')
+            next_unknown = gear_row.gears.index('?')
 
-            broken_row = gear_row[0].copy()
+            broken_row = gear_row.gears.copy()
             broken_row[next_unknown] = '#'
-            is_broken_valid = self.get_working_permutations((broken_row, gear_row[1]))
+            is_broken_valid = self.get_working_permutations(GearRow(broken_row, gear_row.runs))
 
-            working_row = gear_row[0].copy()
+            working_row = gear_row.gears.copy()
             working_row[next_unknown] = '.'
-            is_working_valid = self.get_working_permutations((working_row, gear_row[1]))
+            is_working_valid = self.get_working_permutations(GearRow(working_row, gear_row.runs))
 
             return int(is_broken_valid) + int(is_working_valid)
 
@@ -153,46 +164,37 @@ class Puzzle(PuzzleBase):
             new_runs = []
 
             for i in range(5):
-                new_gears += row[0].copy() + ['?']
-                new_runs += row[1].copy()
+                new_gears += row.gears.copy() + ['?']
+                new_runs += row.runs.copy()
 
-            new_rows.append((new_gears[:-1], new_runs))
+            new_rows.append(GearRow(new_gears[:-1], new_runs))
 
         self.gear_rows = new_rows
 
-    def get_part_1_answer(self, use_sample=False) -> str:
+    def calculate_solutions(self):
         total = 0
 
         for row in self.gear_rows:
-            # print((''.join(row[0])), row[1])
+            print(row)
+            row.simplify()
+            print(row)
 
-            simplified_row = self.simplify_row(row)
-            solutions = self.get_working_permutations(simplified_row)
-
-            # print((''.join(simplified_row[0])), simplified_row[1], f' - Solutions: {solutions}')
-            # print('\n')
-
-            total += solutions
-
-        return str(total)
-
-    def get_part_2_answer(self, use_sample=False) -> str:
-        self.expand_rows()
-
-        total = 0
-
-        for row in self.gear_rows:
-            print((''.join(row[0])), row[1])
-
-            simplified_row = self.simplify_row(row)
-            solutions = self.get_working_permutations(simplified_row)
-
-            print((''.join(simplified_row[0])), simplified_row[1], f' - Solutions: {solutions}')
+            solutions = self.get_working_permutations(row)
+            print(f'Solutions: {solutions}')
             print('\n')
 
             total += solutions
 
-        return str(total)
+        return total
+
+    def get_part_1_answer(self, use_sample=False) -> str:
+        return str(self.calculate_solutions())
+
+    def get_part_2_answer(self, use_sample=False) -> str:
+        return ''
+
+        self.expand_rows()
+        return str(self.calculate_solutions())
 
 
 if __name__ == "__main__":
