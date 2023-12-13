@@ -1,16 +1,20 @@
+import functools
 from enum import Enum
-from typing import List
+from typing import List, Union
 
 from puzzle_base import PuzzleBase
 
 
 class GearRow:
-    def __init__(self, gears: list[str], runs: list[int]):
+    def __init__(self, gears: Union[list[str], tuple[str]], runs: Union[list[int], tuple[int]]):
         self.gears = gears
         self.runs = runs
 
     def __str__(self):
         return f'{"".join(self.gears)} {",".join([str(r) for r in self.runs])}'
+
+    def __hash__(self):
+        return hash(''.join(self.gears))
 
     def get_row_margin(self):
         return len(self.gears) - sum(self.runs) - (len(self.runs) - 1)
@@ -90,10 +94,10 @@ class GearRow:
     def is_valid(self, fail_if_more_broken_gears=True) -> bool:
         current_run = 0
 
-        gears = self.gears.copy()
+        gears = list(self.gears).copy()
         gears.append('.')  # padding to make testing at the edge easier
 
-        runs_to_test = self.runs.copy()
+        runs_to_test = list(self.runs).copy()
 
         for i, gear in enumerate(gears):
             if gear == '#':
@@ -136,31 +140,44 @@ class Puzzle(PuzzleBase):
                 [int(r) for r in broken_runs.split(',')]
             ))
 
-    def get_working_permutations(self, gear_row: GearRow, runs_filled=[]):
-        if len(gear_row.runs) and '?' not in gear_row.gears:
+    @functools.lru_cache(maxsize=None)
+    def get_working_permutations(self, gears: tuple[str], runs: tuple[int], runs_filled=None, last_pos=0):
+        if runs_filled is None:
+            runs_filled = tuple([])
+        if not len(gears):
+            # this row was simplified away, but we need to return *something* to indicate a working solution
+            # return tuple([1])
+            return 1
+        if len(runs) and '?' not in gears:
+            # return ()  # no more spots to fill, but not all runs are satisfied
             return 0  # no more spots to fill, but not all runs are satisfied
-        elif not len(gear_row.runs):
-            return 0 if '?' in gear_row.gears else 1  # this row is already satisfied
-        elif '?' not in gear_row.gears:
-            return int(gear_row.is_valid())
+        elif not len(runs):
+            gear_row = GearRow(gears, runs_filled)
 
-        gears = list(gear_row.gears).copy()
+            # if gear_row.is_valid():
+            #     print(f'Valid      : {gear_row}')
+
+            # return tuple([str(gear_row).replace('?', '.')]) if gear_row.is_valid() else ()
+            return 1 if gear_row.is_valid() else 0
+
+        gears = list(gears)
         gears.append('.')
 
         first_unknown = gears.index('?')
         prior_row = GearRow(gears[:first_unknown], runs_filled)
         if len(runs_filled) and not prior_row.is_valid(False):
+            # return ()  # this row is invalidated
             return 0  # this row is invalidated
 
         candidate_gear_rows = set()
-        next_runs = gear_row.runs.copy()[1:]
-        space_to_fill = gear_row.runs[0]
+        next_runs = runs[1:]
+        space_to_fill = runs[0]
 
         breaks_seen = 0
 
-        # print(f'Testing row: {gear_row}')
+        print(f'\nTesting row: {"".join(gears)} | {space_to_fill}')
 
-        for i in range(len(gears) - space_to_fill):
+        for i in range(last_pos, len(gears) - space_to_fill):
             if i > first_unknown and gears[i] == '#':
                 breaks_seen += 1
 
@@ -169,7 +186,7 @@ class Puzzle(PuzzleBase):
 
             if (1 > 0 and gears[i-1] == '#') or gears[i+space_to_fill] == '#' or \
                     not all([gear in '#?' for gear in gears[i:i+space_to_fill]]):
-                # can only claim this space if it's all broken or unknown, and the borders are not #
+                # can only claim this space if it's made of # and ?, and the borders are not #
                 continue
 
             new_gears = gears.copy()
@@ -182,11 +199,26 @@ class Puzzle(PuzzleBase):
                 new_gears[i + j] = '#'
             new_gears[i + space_to_fill] = '.'
 
-            candidate_gear_rows.add(tuple(new_gears[:-1]))
+            new_gears = new_gears[:-1]
 
-        return sum(
-            [self.get_working_permutations(GearRow(c, next_runs), runs_filled + [gear_row.runs[0]])
-             for c in candidate_gear_rows])
+            print(''.join(new_gears[:i] + ['!'] + new_gears[i+1:]))
+
+            candidate_gear_rows.add(tuple(new_gears))
+
+        working_sets = tuple([self.get_working_permutations(c, next_runs,
+                                                            tuple(tuple(runs_filled) + tuple([runs[0]])),
+                                                            last_pos + space_to_fill)
+                              for c in candidate_gear_rows])
+
+        for i, candidate in enumerate(candidate_gear_rows):
+            print(f'{"".join(candidate)} | {working_sets[i]}')
+
+        if not len(working_sets):
+            # return ()
+            return 0
+
+        # return functools.reduce(lambda a, b: a + b, working_sets)
+        return sum(working_sets)
 
     def expand_rows(self):
         new_rows = []
@@ -211,7 +243,10 @@ class Puzzle(PuzzleBase):
             row.simplify()
             print(row)
 
-            solutions = self.get_working_permutations(row)
+            solutions = self.get_working_permutations(
+                tuple(row.gears),
+                tuple(row.runs))
+
             print(f'Solutions: {solutions}')
             print('\n')
 
