@@ -172,6 +172,12 @@ class Grid:
             candidates += [(x0 - 1, y0 - 1), (x0 - 1, y0 + 1), (x0 + 1, y0 - 1), (x0 + 1, y0 + 1)]
         return [(p, self[p]) for p in candidates if self[p] is not None]
 
+    def export_values(self) -> dict:
+        return self.grid.copy()
+
+    def import_values(self, value: dict):
+        self.grid = value.copy()
+
     @property
     def width(self) -> int:
         return self.extents[0][1] - self.extents[0][0] + 1
