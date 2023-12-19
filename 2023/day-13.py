@@ -1,11 +1,11 @@
 import math
 from typing import List
 
-from helpers.grid import Grid
+from helpers.grid import ArrayGrid
 from puzzle_base import PuzzleBase
 
 
-def split_grid_to_str(grid: Grid, split_vertically: bool, split_index: int) -> str:
+def split_grid_to_str(grid: ArrayGrid, split_vertically: bool, split_index: int) -> str:
     grid_str = '   ' + ''.join([str((i+1) // 10) for i in range(grid.width)]) + '\n'
     grid_str += '   ' + ''.join([str((i+1) % 10) for i in range(grid.width)]) + '\n'
 
@@ -30,7 +30,7 @@ class Puzzle(PuzzleBase):
     year = 2023
     day = 13
 
-    grids: list[Grid]
+    grids: list[ArrayGrid]
 
     def reset(self):
         self.grids = []
@@ -40,7 +40,7 @@ class Puzzle(PuzzleBase):
 
         for line in input_data:
             if line == '':
-                self.grids.append(Grid.from_strings(grid_strs))
+                self.grids.append(ArrayGrid.from_strings(grid_strs))
                 grid_strs = []
             else:
                 grid_strs.append(line)
@@ -80,29 +80,29 @@ class Puzzle(PuzzleBase):
 
         return -1
 
-    def find_reflection_value(self, grid: Grid, is_part_2: bool):
-        rows = [str(grid[(0, i):(grid.width, i):(1, 1)]) for i in range(grid.height)]
-        cols = [str(grid[(i, 0):(i, grid.height):(1, 1)]) for i in range(grid.width)]
+    def find_reflection_value(self, grid: ArrayGrid, is_part_2: bool):
+        rows = [str(grid[(0, i):(grid.width, i + 1):(1, 1)]) for i in range(grid.height)]
+        cols = [str(grid[(i, 0):(i + 1, grid.height):(1, 1)]) for i in range(grid.width)]
 
         row_repeat_point = self.find_repeat_point(rows, is_part_2)
         col_repeat_point = self.find_repeat_point(cols, is_part_2)
 
-        if is_part_2:
-            part1_row_point = self.find_repeat_point(rows, False)
-            part1_col_point = self.find_repeat_point(cols, False)
-
-            if part1_row_point == -1 and row_repeat_point != -1:
-                col_repeat_point = -1
-            if part1_col_point == -1 and col_repeat_point != -1:
-                row_repeat_point = -1
+        # if is_part_2:
+        #     part1_row_point = self.find_repeat_point(rows, False)
+        #     part1_col_point = self.find_repeat_point(cols, False)
+        #
+        #     if part1_row_point == -1 and row_repeat_point != -1:
+        #         col_repeat_point = -1
+        #     if part1_col_point == -1 and col_repeat_point != -1:
+        #         row_repeat_point = -1
 
         if col_repeat_point > -1:
-            # print(f'{col_repeat_point} columns to left.')
-            # print(split_grid_to_str(grid, True, col_repeat_point))
+            print(f'{col_repeat_point} columns to left.')
+            print(split_grid_to_str(grid, True, col_repeat_point))
             return col_repeat_point
         elif row_repeat_point > -1:
-            # print(f'{row_repeat_point} rows above.')
-            # print(split_grid_to_str(grid, False, row_repeat_point))
+            print(f'{row_repeat_point} rows above.')
+            print(split_grid_to_str(grid, False, row_repeat_point))
             return row_repeat_point * 100
         else:
             print('Something went wrong with this grid:')

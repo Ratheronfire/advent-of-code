@@ -1,6 +1,12 @@
+from abc import ABC
 from typing import List, Tuple, Union, Optional
 
 # Based on code from https://www.reddit.com/r/adventofcode/comments/zkc974/python_data_structures_for_2d_grids/
+
+# Some helpful grid characters:
+# ░░ - Empty space
+# ██ - Filled space
+# ═║╔╗╝╚ - Pipes
 
 
 class Point:
@@ -96,8 +102,8 @@ class Point3D(Point):
 Line = Tuple[Point, Point]
 
 
-class Grid:
-    grid = {}
+class Grid(ABC):
+    grid: any
 
     extents: List[List[int]] = []
 
@@ -112,6 +118,202 @@ class Grid:
         self.default_value = default_value
 
         self._calculate_extents()
+
+    def __getitem__(self, item: Union[Point, _key_base_type, slice]):
+        pass
+
+    def __setitem__(self, key: Union[Point, _key_base_type], value):
+        pass
+
+    def __str__(self):
+        pass
+
+    def index(self, value):
+        pass
+
+    def neighbors(self, pos: Point, include_diagonals=False):
+        pass
+
+    def export_values(self) -> dict:
+        pass
+
+    def import_values(self, value: dict):
+        pass
+
+    @property
+    def width(self) -> int:
+        pass
+
+    @property
+    def height(self) -> int:
+        pass
+
+    def _calculate_extents(self, newest_key=None):
+        pass
+
+    @staticmethod
+    def create_empty(width: int, height: int, default_value='.'):
+        pass
+
+    @staticmethod
+    def from_strings(strings: List[str], default_value='.'):
+        pass
+
+    @staticmethod
+    def from_number_strings(strings: List[str], default_value='.'):
+        pass
+
+    @staticmethod
+    def from_array(rows: List[List[Union[any]]], default_value='.'):
+        pass
+
+    @staticmethod
+    def from_dict(grid_dict):
+        pass
+
+
+class ArrayGrid(Grid):
+    grid: list[list[any]]
+
+    _key_base_type = Tuple[Union[int, float], Union[int, float]]
+
+    def __getitem__(self, item: Union[Point, _key_base_type, slice]):
+        if isinstance(item, slice):
+            subgrid = ArrayGrid.create_empty(abs(item.stop[0] - item.start[0]),
+                                             abs(item.stop[1] - item.start[1]), ' ')
+
+            start, stop, step = _get_range_for_slice(item)
+
+            sub_x, sub_y = (0, 0)
+
+            for x in range(start[0], stop[0] - 1, step[0]):
+                for y in range(start[1], stop[1] - 1, step[1]):
+                    try:
+                        subgrid[(sub_x, sub_y)] = self.grid[y][x]
+                    except KeyError:
+                        subgrid[(sub_x, sub_y)] = self.default_value
+                    sub_y += 1
+                sub_x += 1
+                sub_y = 0
+
+            return subgrid
+        elif isinstance(item, Tuple) or isinstance(item, Point):
+            if self.extents[0][0] <= item[0] <= self.extents[0][1] and \
+                    self.extents[1][0] <= item[1] <= self.extents[1][1]:
+                return self.grid[item[1]][item[0]]
+
+            return None
+        else:
+            raise TypeError('Invalid argument for grid indexing.')
+
+    def __setitem__(self, key: Union[Point, _key_base_type], value):
+        if isinstance(key, slice):
+            raise NotImplementedError
+        else:
+            self.grid[key[1]][key[0]] = value
+
+        self._calculate_extents(key)
+
+    def __str__(self):
+        y_range = range(self.extents[1][1], self.extents[1][0] - 1, -1) if self.invert_y_display else \
+            range(self.extents[1][0], self.extents[1][1] + 1)
+
+        return '\n'.join([
+            ''.join([
+                str(self.grid[y][x] or self.default_value) for x in range(self.extents[0][0], self.extents[0][1] + 1)
+            ]) for y in y_range
+        ])
+
+    def index(self, value):
+        for y in range(self.extents[1][1]):
+            for x in range(self.extents[0][1]):
+                if self[(x, y)] == 'S':
+                    return Point(x, y)
+
+        return None
+
+    def neighbors(self, pos: Point, include_diagonals=False):
+        x0, y0 = pos
+
+        candidates = [(x0 - 1, y0), (x0 + 1, y0), (x0, y0 - 1), (x0, y0 + 1)]
+        if include_diagonals:
+            candidates += [(x0 - 1, y0 - 1), (x0 - 1, y0 + 1), (x0 + 1, y0 - 1), (x0 + 1, y0 + 1)]
+        return [(p, self[p]) for p in candidates if self[p] is not None]
+
+    def export_values(self) -> list[list[any]]:
+        return [row.copy() for row in self.grid]
+
+    def import_values(self, value: list[list[any]]):
+        self.grid = [row.copy() for row in value]
+
+    @property
+    def width(self) -> int:
+        return self.extents[0][1] - self.extents[0][0] + 1
+
+    @property
+    def height(self) -> int:
+        return self.extents[1][1] - self.extents[1][0] + 1
+
+    def _calculate_extents(self, newest_key=None):
+        self.extents = [[0, 0], [0, 0]]
+
+        if not len(self.grid) or not len(self.grid[0]):
+            return
+
+        self.extents[0][0] = 0
+        self.extents[0][1] = len(self.grid[0]) - 1
+
+        self.extents[1][0] = 0
+        self.extents[1][1] = len(self.grid) - 1
+
+    @staticmethod
+    def create_empty(width: int, height: int, default_value='.'):
+        inner_grid = []
+        for i in range(height):
+            row = []
+            for j in range(width):
+                row.append(default_value)
+            inner_grid.append(row)
+
+        grid = ArrayGrid(inner_grid, default_value)
+
+        return grid
+
+    @staticmethod
+    def from_strings(strings: List[str], default_value='.'):
+        grid = ArrayGrid([[char for char in string] for string in strings if string != ''],
+                         default_value)
+
+        return grid
+
+    @staticmethod
+    def from_number_strings(strings: List[str], default_value='.'):
+        grid = ArrayGrid([[int(char) for char in string] for string in strings],
+                         default_value)
+
+        return grid
+
+    @staticmethod
+    def from_array(rows: List[List[Union[any]]], default_value='.'):
+        grid = ArrayGrid(rows, default_value)
+
+        return grid
+
+    @staticmethod
+    def from_dict(grid_dict):
+        raise NotImplementedError
+
+
+class SparseGrid(Grid):
+    grid = {}
+
+    extents: List[List[int]] = []
+
+    invert_y_display = False
+
+    default_value = '░░'
+
+    _key_base_type = Tuple[Union[int, float], Union[int, float]]
 
     def __getitem__(self, item: Union[Point, _key_base_type, slice]):
         if isinstance(item, slice):
@@ -141,11 +343,7 @@ class Grid:
 
     def __setitem__(self, key: Union[Point, _key_base_type], value):
         if isinstance(key, slice):
-            start, stop, step = _get_range_for_slice(key)
-
-            # if len(value) != abs(start[1] - stop[1]) or len(value[0]) != abs(start[0] - stop[0]):
-
-            sub_x, sub_y = (0, 0)
+            raise NotImplementedError
         else:
             if isinstance(key, tuple):
                 key = Point(key[0], key[1])
@@ -155,14 +353,22 @@ class Grid:
         self._calculate_extents(key)
 
     def __str__(self):
-        y_range = range(self.extents[1][1], self.extents[1][0] - 1, -1) if self.invert_y_display else \
-            range(self.extents[1][0], self.extents[1][1] + 1)
+        y_range = range(self.extents[1][1] - 1, self.extents[1][0] - 1, -1) if self.invert_y_display else \
+            range(self.extents[1][0], self.extents[1][1])
 
         return '\n'.join([
             ''.join([
-                str(self[(x, y)] or self.default_value) for x in range(self.extents[0][0], self.extents[0][1] + 1)
+                str(self[(x, y)] or self.default_value) for x in range(self.extents[0][0], self.extents[0][1])
             ]) for y in y_range
         ])
+
+    def index(self, value):
+        for y in range(self.extents[1][1]):
+            for x in range(self.extents[0][1]):
+                if self[(x, y)] == 'S':
+                    return Point(x, y)
+
+        return None
 
     def neighbors(self, pos: Point, include_diagonals=False):
         x0, y0 = pos
@@ -204,41 +410,41 @@ class Grid:
             return
 
         self.extents = [
-            [min([pos[0] for pos in self.grid.keys()]), max([pos[0] for pos in self.grid.keys()])],
-            [min([pos[1] for pos in self.grid.keys()]), max([pos[1] for pos in self.grid.keys()])]
+            [min([pos[0] for pos in self.grid.keys()]), max([pos[0] for pos in self.grid.keys()]) + 1],
+            [min([pos[1] for pos in self.grid.keys()]), max([pos[1] for pos in self.grid.keys()]) + 1]
         ]
 
     @staticmethod
     def create_empty(width: int, height: int, default_value='.'):
-        grid = Grid({(x, y): default_value for y, line in enumerate(range(height))
-                     for x, _ in enumerate(range(width))}, default_value)
+        grid = SparseGrid({(x, y): default_value for y, line in enumerate(range(height))
+                           for x, _ in enumerate(range(width))}, default_value)
 
         return grid
 
     @staticmethod
     def from_strings(strings: List[str], default_value='.'):
-        grid = Grid({(x, y): val for y, line in enumerate(strings)
-                     for x, val in enumerate(line)}, default_value)
+        grid = SparseGrid({(x, y): val for y, line in enumerate(strings)
+                           for x, val in enumerate(line)}, default_value)
 
         return grid
 
     @staticmethod
     def from_number_strings(strings: List[str], default_value='.'):
-        grid = Grid({(x, y): int(val) for y, line in enumerate(strings)
-                     for x, val in enumerate(line)}, default_value)
+        grid = SparseGrid({(x, y): int(val) for y, line in enumerate(strings)
+                           for x, val in enumerate(line)}, default_value)
 
         return grid
 
     @staticmethod
     def from_array(rows: List[List[Union[any]]], default_value='.'):
-        grid = Grid({(x, y): val for y, line in enumerate(rows)
-                     for x, val in enumerate(line)}, default_value)
+        grid = SparseGrid({(x, y): val for y, line in enumerate(rows)
+                           for x, val in enumerate(line)}, default_value)
 
         return grid
 
     @staticmethod
     def from_dict(grid_dict):
-        grid = Grid(grid_dict)
+        grid = SparseGrid(grid_dict)
 
         grid._calculate_extents()
 

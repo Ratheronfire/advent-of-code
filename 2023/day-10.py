@@ -1,6 +1,6 @@
 from typing import List
 
-from helpers.grid import Grid, Point
+from helpers.grid import Grid, Point, ArrayGrid
 from puzzle_base import PuzzleBase
 
 
@@ -18,12 +18,17 @@ PIPE_NEIGHBOR_OFFSETS = {
 }
 
 CHAR_REPLACEMENTS = {
-    '|': '║',
-    '-': '═',
-    'F': '╔',
-    '7': '╗',
-    'L': '╚',
-    'J': '╝'
+    '|': '║ ',
+    '-': '══',
+    'F': '╔═',
+    '7': '╗ ',
+    'L': '╚═',
+    'J': '╝ ',
+    '.': '  ',
+    '#': '██',
+    'S': 'SS',
+    'I': '██',
+    'O': '░░'
 }
 
 # Key: Tuple containing in/out direction
@@ -104,11 +109,11 @@ class Puzzle(PuzzleBase):
     loop: list[Point]
 
     def reset(self):
-        self.grid = Grid.create_empty(0, 0)
+        self.grid = ArrayGrid.create_empty(0, 0)
         self.loop = []
 
     def prepare_data(self, input_data: List[str], current_part: int):
-        self.grid = Grid.from_strings(input_data)
+        self.grid = ArrayGrid.from_strings(input_data)
 
     def get_pipe_neighbors(self, pipe_pos: Point):
         neighbors = []
@@ -121,7 +126,7 @@ class Puzzle(PuzzleBase):
         return neighbors
 
     def get_start_replacement(self):
-        x, y = start = [pos for pos in self.grid.grid if self.grid[pos] == 'S'][0]
+        x, y = start = self.grid.index('S')
 
         pipe_neighbors = self.get_pipe_neighbors(start)
 
@@ -129,11 +134,11 @@ class Puzzle(PuzzleBase):
             return '-'
         if pipe_neighbors[0][1] == y and pipe_neighbors[1][1] == y:
             return '|'
-        if any([p[0] - x == 1 for p in pipe_neighbors]) and any([p[1] - y == 1 for p in pipe_neighbors]):
+        if any([p[0] - x == -1 for p in pipe_neighbors]) and any([p[1] - y == 1 for p in pipe_neighbors]):
             return '7'
         if any([p[0] - x == 1 for p in pipe_neighbors]) and any([p[1] - y == -1 for p in pipe_neighbors]):
             return 'J'
-        if any([p[0] - x == -1 for p in pipe_neighbors]) and any([p[1] - y == 1 for p in pipe_neighbors]):
+        if any([p[0] - x == 1 for p in pipe_neighbors]) and any([p[1] - y == 1 for p in pipe_neighbors]):
             return 'F'
         if any([p[0] - x == -1 for p in pipe_neighbors]) and any([p[1] - y == -1 for p in pipe_neighbors]):
             return 'L'
@@ -141,10 +146,10 @@ class Puzzle(PuzzleBase):
         return 'S'
 
     def locate_loop(self):
-        x, y = [pos for pos in self.grid.grid if self.grid[pos] == 'S'][0]
+        x, y = s_point = self.grid.index('S')
 
         loop_segments = set()
-        loop_segments.add((x, y))
+        loop_segments.add(s_point)
 
         loop_finished = False
 
@@ -163,18 +168,18 @@ class Puzzle(PuzzleBase):
         self.loop = [l for l in loop_segments]
 
     def isolate_loop(self):
-        for x in range(self.grid.extents[0][1] + 1):
-            for y in range(self.grid.extents[1][1] + 1):
-                if (x, y) not in self.loop and self.grid[(x, y)] not in 'IOS?':
+        for x in range(self.grid.extents[0][1]):
+            for y in range(self.grid.extents[1][1]):
+                if (x, y) not in self.loop and self.grid[(x, y)] and self.grid[(x, y)] not in 'IOS?':
                     self.grid[(x, y)] = self.grid.default_value
 
     def pretty_print_grid(self):
-        grid_copy = Grid.from_strings(str(self.grid).split('\n'))
+        grid_copy = ArrayGrid(self.grid.export_values(), self.grid.default_value)
 
-        for x in range(self.grid.extents[0][1] + 1):
-            for y in range(self.grid.extents[1][1] + 1):
-                if (x, y) not in self.loop and grid_copy[(x, y)] not in 'IOSAB?':
-                    grid_copy[x, y] = self.grid.default_value
+        for x in range(self.grid.extents[0][1]):
+            for y in range(self.grid.extents[1][1]):
+                if (x, y) not in self.loop and grid_copy[x, y] not in 'IOS':
+                    grid_copy[x, y] = CHAR_REPLACEMENTS[self.grid.default_value]
                 elif grid_copy[x, y] in CHAR_REPLACEMENTS:
                     grid_copy[x, y] = CHAR_REPLACEMENTS[grid_copy[x, y]]
 
@@ -185,18 +190,18 @@ class Puzzle(PuzzleBase):
         is_inner = False
         last_pipe = ''
 
-        for y in range(self.grid.extents[1][1] + 1):
-            for x in range(self.grid.extents[0][1] + 1):
+        for y in range(self.grid.extents[1][1]):
+            for x in range(self.grid.extents[0][1]):
                 tile = self.grid[(x, y)]
 
-                if tile in '|L7JF':
+                if tile and tile in '|L7JF':
                     if last_pipe + tile not in ['L7', 'FJ']:
                         is_inner = not is_inner
 
                     last_pipe = tile
 
-                # if tile == self.grid.default_value:
-                #     self.grid[(x, y)] = 'I' if is_inner else 'O'
+                if tile == self.grid.default_value:
+                    self.grid[(x, y)] = 'I' if is_inner else 'O'
 
                 if is_inner and tile == self.grid.default_value:
                     total += 1
@@ -208,16 +213,21 @@ class Puzzle(PuzzleBase):
     def get_part_1_answer(self, use_sample=False) -> str:
         self.locate_loop()
 
+        self.pretty_print_grid()
+
         return str(len(self.loop) // 2)
 
     def get_part_2_answer(self, use_sample=False) -> str:
         self.locate_loop()
         self.isolate_loop()
 
-        start_pos = [pos for pos in self.grid.grid if self.grid[pos] == 'S'][0]
+        start_pos = self.grid.index('S')
         self.grid[start_pos] = self.get_start_replacement()
 
-        return str(self.scan_for_inner_points())
+        total = self.scan_for_inner_points()
+        self.pretty_print_grid()
+
+        return str(total)
 
 
 if __name__ == "__main__":

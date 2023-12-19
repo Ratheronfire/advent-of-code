@@ -1,6 +1,6 @@
 from typing import List
 
-from helpers.grid import Grid, Point
+from helpers.grid import Grid, Point, ArrayGrid
 from puzzle_base import PuzzleBase
 
 
@@ -14,18 +14,16 @@ class Puzzle(PuzzleBase):
 
     def reset(self):
         self.rock_cache = {}
-        self.grid = Grid.create_empty(0, 0, '.')
+        self.grid = ArrayGrid.create_empty(0, 0, '.')
 
     def prepare_data(self, input_data: List[str], current_part: int):
-        self.grid = Grid.from_strings(input_data)
+        self.grid = ArrayGrid.from_strings(input_data)
 
     def get_round_rocks(self) -> list[Point]:
         rock_positions = []
 
-        x_extents, y_extents = self.grid.extents
-
-        for y in range(y_extents[0], y_extents[1] + 1):
-            for x in range(x_extents[0], x_extents[1] + 1):
+        for y in range(0, self.grid.height):
+            for x in range(0, self.grid.width):
                 if self.grid[(x, y)] == 'O':
                     rock_positions.append(Point(x, y))
 
@@ -41,6 +39,7 @@ class Puzzle(PuzzleBase):
         rocks_before = hash(tuple([(r.x, r.y) for r in self.get_round_rocks()] + [(tilt_dir.x, tilt_dir.y)]))
 
         if rocks_before in self.rock_cache:
+            print('Cached!')
             self.grid.import_values(self.rock_cache[rocks_before])
             return
 
@@ -49,7 +48,7 @@ class Puzzle(PuzzleBase):
 
         while any([self.grid[r + tilt_dir] == '.' for r in rocks]):
             for rock in rocks:
-                new_rock = self.get_next_position(rock,tilt_dir)
+                new_rock = self.get_next_position(rock, tilt_dir)
 
                 self.grid[rock] = self.grid.default_value
                 self.grid[new_rock] = 'O'
@@ -63,7 +62,6 @@ class Puzzle(PuzzleBase):
 
     def spin(self, count: int):
         rock_history = []
-        found_loop = False
 
         i = 0
         while i < count:
@@ -72,45 +70,40 @@ class Puzzle(PuzzleBase):
             self.tilt_grid(Point(0, 1))
             self.tilt_grid(Point(1, 0))
 
-            rocks = hash(tuple([(r.x, r.y) for r in self.get_round_rocks()]))
+            rocks = [(r.x, r.y) for r in self.get_round_rocks()]
 
-            if not found_loop:
-                for j, rock_set in enumerate(rock_history):
-                    if rock_set == rocks:
-                        print(f'Loop found from {j} to {i}!')
-                        print(self.grid)
+            for j, rock_set in enumerate(rock_history):
+                if rock_set == rocks:
+                    print(f'Loop found from {j} to {i}!')
+                    print(self.grid)
 
-                        found_loop = True
+                    loop_period = i - j
+                    loop_offset = (count - j) % -loop_period - 1
+                    return rock_history[loop_offset]
 
-                        loop_period = i - j
-                        loop_offset = (count - j) % loop_period
-                        i = count - loop_offset
-
-                        break
-
-                rock_history.append(rocks)
+            rock_history.append(rocks)
 
             i += 1
-        print(f'Final run: {i}')
 
-    def get_load(self):
-        rocks = self.get_round_rocks()
+    def get_load(self, rocks: list[Point]):
         total_load = 0
 
         for rock in rocks:
-            total_load += self.grid.height - rock.y
+            total_load += self.grid.height - rock[1]
 
         return total_load
 
     def get_part_1_answer(self, use_sample=False) -> str:
         self.tilt_grid(Point(0, -1))
 
-        return str(self.get_load())
+        print(self.grid)
+
+        return str(self.get_load(self.get_round_rocks()))
 
     def get_part_2_answer(self, use_sample=False) -> str:
-        self.spin(1000000000)
+        rocks = self.spin(1000000000)
 
-        return str(self.get_load())
+        return str(self.get_load(rocks))
 
 
 if __name__ == "__main__":
