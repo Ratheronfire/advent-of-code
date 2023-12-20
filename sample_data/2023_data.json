@@ -88,9 +88,9 @@
   },
   {
     "day": 15,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "rn=1,cm-,qp=3,cm=2,qp-,pc=4,ot=9,ab=5,pc-,pc=6,ot=7",
+    "answer_1": "1320",
+    "answer_2": "145"
   },
   {
     "day": 16,
