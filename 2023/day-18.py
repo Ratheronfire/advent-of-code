@@ -28,7 +28,7 @@ class Puzzle(PuzzleBase):
     year = 2023
     day = 18
 
-     vertices: list[Point]
+    vertices: list[Point]
 
     def reset(self):
         self.vertices = []
