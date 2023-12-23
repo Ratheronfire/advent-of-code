@@ -119,6 +119,11 @@ class Grid(ABC):
 
         self._calculate_extents()
 
+    def points(self):
+        for y in range(self.extents[1][0], self.extents[1][1] + 1):
+            for x in range(self.extents[0][0], self.extents[0][1] + 1):
+                yield Point(x, y)
+
     def __getitem__(self, item: Union[Point, _key_base_type, slice]):
         pass
 
@@ -335,9 +340,9 @@ class SparseGrid(Grid):
 
             return subgrid
         elif isinstance(item, Tuple):
-            return self.grid[Point(item[0], item[1])] if item in self.grid else None
+            return self.grid[Point(item[0], item[1])] if item in self.grid else self.default_value
         elif isinstance(item, Point):
-            return self.grid[item] if item in self.grid else None
+            return self.grid[item] if item in self.grid else self.default_value
         else:
             raise TypeError('Invalid argument for grid indexing.')
 
@@ -353,19 +358,19 @@ class SparseGrid(Grid):
         self._calculate_extents(key)
 
     def __str__(self):
-        y_range = range(self.extents[1][1] - 1, self.extents[1][0] - 1, -1) if self.invert_y_display else \
-            range(self.extents[1][0], self.extents[1][1])
+        y_range = range(self.extents[1][1], self.extents[1][0] - 1, -1) if self.invert_y_display else \
+            range(self.extents[1][0], self.extents[1][1] + 1)
 
         return '\n'.join([
             ''.join([
-                str(self[(x, y)] or self.default_value) for x in range(self.extents[0][0], self.extents[0][1])
+                str(self[(x, y)] or self.default_value) for x in range(self.extents[0][0], self.extents[0][1] + 1)
             ]) for y in y_range
         ])
 
     def index(self, value):
         for y in range(self.extents[1][1]):
             for x in range(self.extents[0][1]):
-                if self[(x, y)] == 'S':
+                if self[(x, y)] == value:
                     return Point(x, y)
 
         return None
