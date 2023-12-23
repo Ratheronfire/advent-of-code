@@ -28,17 +28,14 @@ class Puzzle(PuzzleBase):
     year = 2023
     day = 18
 
-    grid: Grid
-    dig_plan: list[DigInstruction]
-    last_pos: Point
+     vertices: list[Point]
 
     def reset(self):
-        self.grid = SparseGrid.create_empty(0, 0, '.')
-        self.dig_plan = []
-
-        self.last_pos = Point(0, 0)
+        self.vertices = []
 
     def prepare_data(self, input_data: List[str], current_part: int):
+        current_point = Point(0, 0)
+
         for i in range(len(input_data)):
             line = input_data[i]
 
@@ -46,17 +43,13 @@ class Puzzle(PuzzleBase):
                 continue
 
             direction, steps, color = line.split()
-            self.dig_plan.append(DigInstruction(
-                direction, int(steps), color[2:-1]
-            ))
 
-    def dig(self, dig_instruction: DigInstruction, true_instruction=False):
-        for i in range(dig_instruction.true_steps if true_instruction else dig_instruction.steps):
-            self.grid[self.last_pos] = '#'
-            self.last_pos = self.last_pos + \
-                            (dig_instruction.true_direction
-                             if true_instruction else
-                             dig_instruction.direction)
+            if current_part == 2:
+                steps = int(color[2:-2], 16)
+                direction = color[-2:-1]
+
+            current_point += DIRECTIONS[direction] * int(steps)
+            self.vertices.append(current_point)
 
     def get_inside_count(self):
         is_inside = False
@@ -64,54 +57,67 @@ class Puzzle(PuzzleBase):
 
         inside_tiles = 0
 
-        for point in self.grid.points():
-            tile = self.grid[point]
+        ys = list(sorted(set([vertex.y for vertex in self.vertices])))
+        ys += [ys[0] + 1] + [y - 1 for y in ys[1:-1]] + [y + 1 for y in ys[1:-1]] + [ys[-1] - 1]
+        ys = sorted(set(ys))
 
-            if tile == '#':
-                tile_above = self.grid[point + Point(0, -1)]
-                tile_below = self.grid[point + Point(0, 1)]
+        lines = [sorted([self.vertices[i-1], self.vertices[i]], key=lambda p: (p.y, p.x))
+                 for i in range(len(self.vertices))]
+        lines = sorted(lines, key=lambda l: l[0].x + l[1].x)
 
-                if last_corner_was_up is not None and self.grid[point + Point(1, 0)] == '#':
-                    continue
+        for i, y in enumerate(ys):
+            tiles_this_line = 0
 
-                if tile_above == '#' and tile_below == '#':
-                    is_inside = not is_inside
-                elif tile_below != '#':
-                    if last_corner_was_up is None:
-                        last_corner_was_up = True
-                    elif not last_corner_was_up:
+            is_inside = False
+            overlaps = [line for line in lines if line[0].y <= y <= line[1].y or
+                                                  line[1].y <= y <= line[0].y]
+
+            for j, overlap in enumerate(overlaps):
+                if overlap[0].x == overlap[1].x:
+                    # vertical line
+                    tiles_this_line += 1
+                    # print(f'Adding tile for vertical line {overlap[0]}->{overlap[1]}.')
+
+                    if y in [overlap[0].y, overlap[1].y]:
+                        line_end = overlap[1].y if overlap[0].y == y else overlap[0].y
+                        corner_is_up = line_end < y
+
+                        if last_corner_was_up is None:
+                            last_corner_was_up = corner_is_up
+                        else:
+                            if last_corner_was_up != corner_is_up:
+                                is_inside = not is_inside
+                            last_corner_was_up = None
+                    else:
                         is_inside = not is_inside
-                elif tile_above != '#':
-                    if last_corner_was_up is None:
-                        last_corner_was_up = False
-                    elif last_corner_was_up:
-                        is_inside = not is_inside
+
+                    if is_inside and j <= len(overlaps) - 2:
+                        next_overlap = overlaps[j+1]
+                        if overlap[0].x == overlap[1].x and \
+                            next_overlap[0].x == next_overlap[1].x:
+                            # inbetween two vertical lines
+                            tiles_this_line += abs(next_overlap[0].x - overlap[0].x) - 1
+                            # print(f'Adding gap between x={overlap[0].x}->{next_overlap[0].x} at y={y}.')
+                else:
+                    # horizontal line
+                    tiles_this_line += abs(overlap[1].x - overlap[0].x) - 1
+                    # print(f'Adding line from x={overlap[0].x}->{overlap[1].x} at y={y}.')
+
+            if i <= len(ys) - 2:
+                y_gap = max(1, abs(ys[i+1] - ys[i]))
+                # print(f'Repeating last row {y_gap} times => {tiles_this_line} * {y_gap} = {tiles_this_line * y_gap} tiles.\n')
+                inside_tiles += tiles_this_line * y_gap
             else:
-                last_corner_was_up = None
-
-                if is_inside:
-                    inside_tiles += 1
-
-            if point.x == self.grid.extents[0][1]:
-                is_inside = False
+                # print(f'Adding final row.')
+                inside_tiles += tiles_this_line
 
         return inside_tiles
 
     def get_part_1_answer(self, use_sample=False) -> str:
-        for dig_instruction in self.dig_plan:
-            self.dig(dig_instruction)
-
-        inside_tiles = self.get_inside_count()
-
-        return str(inside_tiles + len([i for i in self.grid.grid.keys() if self.grid[i] == '#']))
+        return str(self.get_inside_count())
 
     def get_part_2_answer(self, use_sample=False) -> str:
-        for dig_instruction in self.dig_plan:
-            self.dig(dig_instruction, True)
-
-        inside_tiles = self.get_inside_count()
-
-        return str(inside_tiles + len([i for i in self.grid.grid.keys() if self.grid[i] == '#']))
+        return str(self.get_inside_count())
 
 
 if __name__ == "__main__":
