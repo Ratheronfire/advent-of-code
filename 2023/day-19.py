@@ -1,6 +1,10 @@
+from functools import reduce
 from typing import List
 
 from puzzle_base import PuzzleBase
+
+
+CATEGORIES = 'xmas'
 
 
 class Part:
@@ -100,6 +104,36 @@ class Puzzle(PuzzleBase):
 
         return category == 'A'
 
+    def get_accepted_window(self, workflow_id: str, mins: tuple, maxes: tuple):
+        accepted = 0
+
+        mins = list(mins)
+        maxes = list(maxes)
+
+        workflow = self.workflows[workflow_id]
+
+        for rule in workflow.rules:
+            r_mins = mins.copy()
+            r_maxes = maxes.copy()
+
+            if not rule.is_fallback and rule.comparison_is_greater:
+                r_mins[CATEGORIES.index(rule.category)] = rule.compare_to + 1
+                maxes[CATEGORIES.index(rule.category)] = rule.compare_to
+            elif not rule.is_fallback:
+                r_maxes[CATEGORIES.index(rule.category)] = rule.compare_to - 1
+                mins[CATEGORIES.index(rule.category)] = rule.compare_to
+
+            if rule.destination == 'A':
+                accepted_count = reduce(lambda a, b: a * b, [r_maxes[i] - r_mins[i] + 1 for i in range(len(r_mins))])
+                print(f'Found {accepted_count} possible values at workflow: {workflow}; rule: {rule}.\n'
+                      f'Ranges: {r_mins}, {r_maxes}\n')
+                accepted += accepted_count
+            elif rule.destination != 'R':
+                accepted += self.get_accepted_window(rule.destination,
+                                                     tuple(r_mins), tuple(r_maxes))
+
+        return accepted
+
     def get_part_1_answer(self, use_sample=False) -> str:
         total = 0
 
@@ -110,7 +144,7 @@ class Puzzle(PuzzleBase):
         return str(total)
 
     def get_part_2_answer(self, use_sample=False) -> str:
-        return ''
+        return str(self.get_accepted_window('in', (1, 1, 1, 1), (4000, 4000, 4000, 4000)))
 
 
 if __name__ == "__main__":
