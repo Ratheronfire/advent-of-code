@@ -1,3 +1,4 @@
+import functools
 import itertools
 import math
 import operator
@@ -229,24 +230,136 @@ class Puzzle(PuzzleBase):
 
             return max_possible_score
 
+    # runner_states: (current room id, dest room id, turns until arrived (if 0, needs a new room))
+    @functools.lru_cache(maxsize=None)
+    def get_highest_subpath(self, runner_states: tuple, opened_rooms: tuple, minutes_left: int, points_so_far=0):
+        total_permutations = math.factorial(len([r for r in self.rooms.values() if r.rate > 0]))
+
+        cache = self.get_highest_subpath.cache_info()
+
+        if (cache.hits + cache.misses) % 100000 == 0:
+            print(f'{cache.hits + cache.misses}/{total_permutations} runs ({100*(cache.hits + cache.hits)/total_permutations}%)')
+
+        opened_rooms = list(opened_rooms)
+
+        # rooms that no runner has reached
+        remaining_rooms = [r for r in self.rooms.values()
+                           if r.rate > 0 and
+                           r.id not in opened_rooms and r.id not in [s[1] for s in runner_states]]
+
+        # preparing the next set of rooms
+        next_room_candiates = []
+        for i in range(len(runner_states)):
+            next_room_candiates.append([])
+
+        for i, runner_state in enumerate(runner_states):
+            # getting all the possible next rooms for any runners that are ready
+            if runner_state[1] is None or runner_state[2] <= 0:
+                if runner_state[1] is not None:
+                    opened_rooms += [runner_state[1]]
+                    # print(f'Minute {minutes_left}: Opened valve {runner_state[1]}.')
+
+                for next_room in remaining_rooms:
+                    minutes_taken = len(self.cached_room_paths[(runner_state[0], next_room.id)]) + 1
+                    minutes_left_after = minutes_left - minutes_taken
+
+                    if minutes_left_after >= 0:
+                        next_room_candiates[i].append(next_room.id)
+
+        # getting the pressure released this step
+        pressure_released = sum([r.rate for r in self.rooms.values() if r.id in opened_rooms])
+        # print(f'Minute {minutes_left}: {points_so_far} total, {pressure_released} pressure released this turn. {opened_rooms}')
+
+        # reached the end of this chain
+        if minutes_left <= 0:
+            print(f'{minutes_left} minutes left. Total pressure: {points_so_far + pressure_released}; Opened valves: {opened_rooms}')
+            return points_so_far + pressure_released
+
+        # turning the possible rooms into pairs if applicable
+        candidate_pairs = []
+        if len(next_room_candiates) == 1:
+            candidate_pairs = [tuple([room]) for room in next_room_candiates[0]]
+        elif len (next_room_candiates[0]) == 0:
+            candidate_pairs = [(None, room) for room in next_room_candiates[1]]
+        elif len (next_room_candiates[1]) == 0:
+            candidate_pairs = [(room, None) for room in next_room_candiates[0]]
+        else:
+            for room_a in next_room_candiates[0]:
+                for room_b in next_room_candiates[1]:
+                    if room_a != room_b:
+                        candidate_pairs.append((room_a, room_b))
+
+        # finding the results of each candidate pair
+        results = []
+        for candidate_pair in candidate_pairs:
+            new_states = list([list(s).copy() for s in runner_states]).copy()
+
+            for i, runner_state in enumerate(new_states):
+                if candidate_pair[i] is not None:
+                    runner_state[0] = runner_state[1] if runner_state[1] is not None else runner_state[0]
+                    runner_state[1] = candidate_pair[i]
+                    runner_state[2] = len(self.cached_room_paths[runner_state[0], runner_state[1]]) + 1
+
+            # advancing to whichever runner has their next state change
+            minute_gap = min([s[2] for s in new_states])
+            next_minute_point = minutes_left - minute_gap
+
+            if next_minute_point < 0:
+                print(
+                    f'next_minute_point too large ({next_minute_point}). Total pressure: {points_so_far + pressure_released * minutes_left}; Opened valves: {opened_rooms}')
+                return points_so_far + pressure_released * minutes_left
+
+            for runner_state in new_states:
+                runner_state[2] = runner_state[2] - minute_gap
+
+            results.append(self.get_highest_subpath(tuple([tuple(s) for s in new_states]),
+                                                    tuple(opened_rooms.copy()),
+                                                    next_minute_point,
+                                                    points_so_far + minute_gap * pressure_released))
+
+        if len(results) == 0:
+            # finishing any last traversals when all rooms are claimed or open
+            final_points = points_so_far + pressure_released * minutes_left
+
+            new_states = list([list(s).copy() for s in runner_states]).copy()
+
+            minute_gap = min([s[2] for s in new_states if s[2] > 0] if any([s[2] > 0 for s in new_states]) else [0])
+            next_minute_point = minutes_left - minute_gap
+
+            for runner_state in new_states:
+                if runner_state[2] <= 0:
+                    runner_state[1] = None
+
+            for runner_state in new_states:
+                if runner_state[2] > 0:
+                    runner_state[2] = 0
+
+                    final_points = self.get_highest_subpath(tuple([tuple(s) for s in new_states]),
+                                                            tuple(opened_rooms.copy()),
+                                                            next_minute_point,
+                                                            points_so_far + minute_gap * pressure_released)
+
+            print(
+                f'Finished final traversal. Total pressure: {final_points}; Opened valves: {opened_rooms}')
+            return final_points
+
+        return max(results)
+
     def get_part_1_answer(self, use_sample=False) -> str:
         self.precalculate_room_traversals()
 
-        starting_room = self.rooms['AA']
-
-        best_score = self.get_highest_subpath_part1(starting_room)
+        best_score = self.get_highest_subpath(tuple([('AA', None, 0)]), (), 30)
+        self.get_highest_subpath.cache_clear()
 
         return str(best_score)
 
     def get_part_2_answer(self, use_sample=False) -> str:
         self.precalculate_room_traversals()
 
-        starting_rooms = [self.rooms['AA'], self.rooms['AA']]
-
-        best_score = self.get_highest_subpath_part2(starting_rooms, [26, 26])
+        best_score = self.get_highest_subpath(tuple([('AA', None, 0), ('AA', None, 0)]), (), 26)
+        self.get_highest_subpath.cache_clear()
 
         return str(best_score)
-        return ''
 
     def to_mermaidjs_str(self):
         out_str = 'graph TD\n    Start --> AA\n'
@@ -259,4 +372,4 @@ class Puzzle(PuzzleBase):
 
 
 puzzle = Puzzle()
-print(puzzle.test_and_run(False))
+print(puzzle.test_and_run(True))

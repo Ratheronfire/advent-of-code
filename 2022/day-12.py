@@ -2,128 +2,15 @@ import sys
 from typing import List, Tuple, Optional, Union
 
 from helpers.grid import Grid, Grid, Point, ArrayGrid
+from helpers.pathing_grid import PathingGrid, ElevationNode
 from puzzle_base import PuzzleBase
-
-
-class Node:
-    pos: Point
-
-    char_code: str
-
-    elevation: int
-    distance: int
-
-    last_node: 'Node' = None
-    next_node_in_path: 'Node' = None
-
-    is_start = False
-    is_end = False
-
-    def __init__(self, x, y, char_code: str):
-        self.pos = Point(x, y)
-
-        self.char_code = char_code
-
-        self.elevation = (ord(char_code) - ord('a') if char_code not in 'SE' else 0)
-        self.distance = sys.maxsize
-
-    def __str__(self):
-        if self.is_end:
-            return 'E'
-
-        if self.next_node_in_path:
-            node_offset = str(self.next_node_in_path.pos.x - self.pos.x) +\
-                          str(self.next_node_in_path.pos.y - self.pos.y)
-
-            return {
-                '01': '^',
-                '0-1': 'v',
-                '10': '<',
-                '-10': '>'
-            }[node_offset]
-
-        return self.char_code
-
-
-class Map(ArrayGrid):
-    start_pos = (0, 0)
-    end_pos = (0, 0)
-
-    @staticmethod
-    def create_empty(width: int, height: int, default_value='a'):
-        map = Map({(x, y): Node(x, y, default_value) for y, line in enumerate(range(height))
-                   for x, _ in enumerate(range(width))}, default_value)
-
-        return map
-
-    @staticmethod
-    def from_strings(strings: List[str], default_value='.'):
-        map = Map({(x, y): Node(x, y, val)
-                   for y, line in enumerate(strings)
-                   for x, val in enumerate(line)}, default_value)
-
-        map.locate_start_end()
-
-        return map
-
-    @staticmethod
-    def create_empty(width: int, height: int, default_value='.'):
-        _map = Map([], default_value)
-
-        return _map
-
-    @staticmethod
-    def from_strings(strings: List[str], default_value='.'):
-        _map = Map([[Node(x, y, char) for x, char in enumerate(string)]
-                    for y, string in enumerate(strings) if string != ''],
-                   default_value)
-
-        _map.locate_start_end()
-
-        return _map
-
-    def locate_start_end(self):
-        for x in range(self.extents[0][1]):
-            for y in range(self.extents[1][1]):
-                node = self[(x, y)]
-
-                if node.char_code == 'S':
-                    self.start_pos = Point(x, y)
-                    node.is_start = True
-                    node.elevation = 0
-                elif node.char_code == 'E':
-                    self.end_pos = Point(x, y)
-                    node.is_end = True
-                    node.elevation = ord('z') - ord('a')
-                    node.distance = 0
-
-    def get_start_node(self) -> Node:
-        return self.grid[self.start_pos.y][self.start_pos.x]
-
-    def get_end_node(self) -> Node:
-        return self.grid[self.end_pos.y][self.end_pos.x]
-
-    def set_start(self, new_start_pos):
-        old_start = self.get_start_node()
-
-        old_start.is_start = False
-        old_start.elevation = 0
-        old_start.distance = sys.maxsize
-
-        self.start_pos = new_start_pos
-
-        new_start = self.grid[self.start_pos]
-
-        new_start.is_start = True
-        new_start.elevation = 0
-        new_start.distance = 0
 
 
 class Puzzle(PuzzleBase):
     year = 2022
     day = 12
 
-    map: Map
+    grid: PathingGrid
 
     movements: list[Point] = [
         Point(-1, 0), Point(1, 0), Point(0, -1), Point(0, 1)
@@ -133,14 +20,25 @@ class Puzzle(PuzzleBase):
         pass
 
     def prepare_data(self, input_data: List[str], current_part: int):
-        self.map = Map.from_strings(input_data)
+        self.grid = PathingGrid.from_strings(input_data, node_type=ElevationNode)
+        self.locate_start_end()
+
+    def locate_start_end(self):
+        for x in range(self.grid.extents[0][1]):
+            for y in range(self.grid.extents[1][1]):
+                node = self.grid[(x, y)]
+
+                if node.char_code == 'S':
+                    self.grid.set_start(Point(x, y))
+                elif node.char_code == 'E':
+                    self.grid.set_end(Point(x, y))
 
     def calc_path(self):
         node_queue = []
 
-        for x in range(self.map.extents[0][1]):
-            for y in range(self.map.extents[1][1]):
-                node = self.map[(x, y)]
+        for x in range(self.grid.extents[0][1] + 1):
+            for y in range(self.grid.extents[1][1] + 1):
+                node = self.grid[(x, y)]
 
                 if not node.is_end:
                     node.distance = sys.maxsize
@@ -158,7 +56,7 @@ class Puzzle(PuzzleBase):
 
             for movement in self.movements:
                 next_node_coords = node.pos + movement
-                next_node = self.map[next_node_coords]
+                next_node = self.grid[next_node_coords]
 
                 if not next_node or next_node not in node_queue or node.elevation - next_node.elevation > 1:
                     continue
@@ -171,8 +69,8 @@ class Puzzle(PuzzleBase):
         return True
 
     def retrace_path(self, goal_coords) -> int:
-        current_node = self.map[goal_coords]
-        goal_node = self.map.get_end_node()
+        current_node = self.grid[goal_coords]
+        goal_node = self.grid.get_end_node()
 
         path_len = 0
         while current_node != goal_node:
@@ -189,9 +87,9 @@ class Puzzle(PuzzleBase):
     def get_part_1_answer(self, use_sample=False) -> str:
         self.calc_path()
 
-        path_len = self.retrace_path(self.map.start_pos)
+        path_len = self.retrace_path(self.grid.start_pos)
 
-        print(self.map)
+        print(self.grid)
 
         return str(path_len)
 
@@ -200,16 +98,16 @@ class Puzzle(PuzzleBase):
 
         a_candidates = []
 
-        for x in range(self.map.extents[0][1]):
-            for y in range(self.map.extents[1][1]):
-                node = self.map[(x, y)]
+        for x in range(self.grid.extents[0][1] + 1):
+            for y in range(self.grid.extents[1][1] + 1):
+                node = self.grid[(x, y)]
 
                 if node.elevation == 0:
                     a_candidates.append((x, y))
 
         path_lens = [self.retrace_path(candidate) for candidate in a_candidates]
 
-        print(self.map)
+        print(self.grid)
 
         return str(min(path_lens))
 

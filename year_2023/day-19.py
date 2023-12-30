@@ -125,8 +125,8 @@ class Puzzle(PuzzleBase):
 
             if rule.destination == 'A':
                 accepted_count = reduce(lambda a, b: a * b, [r_maxes[i] - r_mins[i] + 1 for i in range(len(r_mins))])
-                print(f'Found {accepted_count} possible values at workflow: {workflow}; rule: {rule}.\n'
-                      f'Ranges: {r_mins}, {r_maxes}\n')
+                # print(f'Found {accepted_count} possible values at workflow: {workflow}; rule: {rule}.\n'
+                #       f'Ranges: {r_mins}, {r_maxes}\n')
                 accepted += accepted_count
             elif rule.destination != 'R':
                 accepted += self.get_accepted_window(rule.destination,

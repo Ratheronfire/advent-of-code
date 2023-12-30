@@ -39,7 +39,7 @@ class PuzzleBase(object):
     sample_data: SampleData
 
     def __init__(self):
-        input_path = os.path.join(ROOT_DIR, str(self.year), 'inputs', 'day-%d.txt' % self.day)
+        input_path = os.path.join(ROOT_DIR, f'year_{self.year}', 'inputs', 'day-%d.txt' % self.day)
         with open(input_path, 'r') as input_file:
             self.input_data = format_input(input_file.read(), self.should_strip_data)
 
