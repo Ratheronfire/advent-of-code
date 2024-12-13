@@ -20,9 +20,9 @@
   },
   {
     "day": 4,
-    "input_data": "",
-    "answer_1": "",
-    "answer_2": ""
+    "input_data": "MMMSXXMASM\nMSAMXMSMSA\nAMXSXMAAMM\nMSAMASMSMX\nXMASAMXAMM\nXXAMMXXAMA\nSMSMSASXSS\nSAXAMASAAA\nMAMMMXMMMM\nMXMXAXMASX\n",    "answer_1": "18",
+    "answer_1": "18",
+    "answer_2": "9"
   },
   {
     "day": 5,

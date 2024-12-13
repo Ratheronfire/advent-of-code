@@ -24,7 +24,7 @@ class Tester(object):
         self.args = parser.parse_args(sys.argv[1:])
 
     def run(self):
-        spec = importlib.util.spec_from_file_location("Puzzle", f"{self.args.year}/day-{self.args.day}.py")
+        spec = importlib.util.spec_from_file_location("Puzzle", f"year_{self.args.year}/day-{self.args.day}.py")
         module = importlib.util.module_from_spec(spec)
         sys.modules["Puzzle"] = module
         spec.loader.exec_module(module)
