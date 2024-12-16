@@ -34,7 +34,7 @@ class Tester(object):
         print(f'{"":<{grid_width}} | {"Part 1":<{grid_width}} | {"Part 2":<{grid_width}}')
 
         for day in range(1, 26):
-            spec = importlib.util.spec_from_file_location("Puzzle", f"{self.args.year}/day-{day}.py")
+            spec = importlib.util.spec_from_file_location("Puzzle", f"year_{self.args.year}/day-{day}.py")
             module = importlib.util.module_from_spec(spec)
             sys.modules["Puzzle"] = module
             spec.loader.exec_module(module)
