@@ -3,6 +3,8 @@ import sys
 import time
 from argparse import ArgumentParser
 
+from func_timeout import func_timeout, FunctionTimedOut
+
 
 class Tester(object):
     year: int
@@ -44,16 +46,17 @@ class Tester(object):
             try:
                 print('=' * ((grid_width * 3) + 6))
 
-                answer_1, answer_2, part_1_timespan, part_2_timespan = puzzle.run(True, True)
+                answer_1, answer_2, part_1_timespan, part_2_timespan = func_timeout(10, puzzle.run, args=(True, True))
 
                 print(f'{"Day " + str(day) + " Result":<{grid_width}} | {answer_1:<{grid_width}} | {answer_2:<{grid_width}}')
-                print(f'{"Day " + str(day) + " Time":<{grid_width}} | {self.format_run_time(part_1_timespan):<{grid_width}} | {self.format_run_time(part_2_timespan):<{grid_width}}')
+                print(f'{"Day " + str(day) + " Time":<{grid_width}} | { self.format_run_time(part_1_timespan):<{grid_width}} | {self.format_run_time(part_2_timespan):<{grid_width}}')
+            except FunctionTimedOut:
+                print(f'{"Day " + str(day) + " Result":<{grid_width}} | {"Timed Out":<{grid_width}} | {"Timed Out":<{grid_width}}')
+                print(f'{"Day " + str(day) + " Time":<{grid_width}} | {"N/A":<{grid_width}} | {"N/A":<{grid_width}}')
 
             except AttributeError:
-                print(
-                    f'{"Day " + str(day) + " Result":<{grid_width}} | {"N/A":<{grid_width}} | {"N/A":<{grid_width}}')
-                print(
-                    f'{"Day " + str(day) + " Time":<{grid_width}} | {"N/A":<{grid_width}} | {"N/A":<{grid_width}}')
+                print(f'{"Day " + str(day) + " Result":<{grid_width}} | {"N/A":<{grid_width}} | {"N/A":<{grid_width}}')
+                print(f'{"Day " + str(day) + " Time":<{grid_width}} | {"N/A":<{grid_width}} | {"N/A":<{grid_width}}')
 
         print(f'Total runtime: {self.format_run_time(time.time() - start_time)}')
 

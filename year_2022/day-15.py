@@ -6,7 +6,7 @@ from typing import List, Optional
 import shapely
 from shapely.geometry import Polygon
 
-from helpers.grid import Grid
+from helpers.grid import SparseGrid
 from puzzle_base import PuzzleBase
 
 
@@ -14,7 +14,7 @@ class Puzzle(PuzzleBase):
     year = 2022
     day = 15
 
-    grid: Grid
+    grid: SparseGrid
 
     sensor_beacons = {}
     sensor_distances = {}
@@ -23,7 +23,7 @@ class Puzzle(PuzzleBase):
     beaconless_polygons: Polygon
 
     def reset(self):
-        self.grid = Grid.create_empty(0, 0, '░░')
+        self.grid = SparseGrid.create_empty(0, 0, '░░')
 
         self.sensor_beacons = {}
         self.sensor_distances = {}

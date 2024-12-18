@@ -38,6 +38,8 @@ class PuzzleBase(object):
     input_data: List[str]
     sample_data: SampleData
 
+    is_silent: bool = False
+
     def __init__(self):
         input_path = os.path.join(ROOT_DIR, f'year_{self.year}', 'inputs', 'day-%d.txt' % self.day)
         with open(input_path, 'r') as input_file:
@@ -110,6 +112,8 @@ class PuzzleBase(object):
     def run(self, both_parts=True, silent=False) -> (str, str):
         answer_1 = ''
         answer_2 = ''
+
+        self.is_silent = silent
 
         time_before = time.time()
 

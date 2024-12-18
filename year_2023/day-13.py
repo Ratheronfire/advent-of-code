@@ -97,16 +97,19 @@ class Puzzle(PuzzleBase):
         #         row_repeat_point = -1
 
         if col_repeat_point > -1:
-            print(f'{col_repeat_point} columns to left.')
-            print(split_grid_to_str(grid, True, col_repeat_point))
+            if not self.is_silent:
+                print(f'{col_repeat_point} columns to left.')
+                print(split_grid_to_str(grid, True, col_repeat_point))
             return col_repeat_point
         elif row_repeat_point > -1:
-            print(f'{row_repeat_point} rows above.')
-            print(split_grid_to_str(grid, False, row_repeat_point))
+            if not self.is_silent:
+                print(f'{row_repeat_point} rows above.')
+                print(split_grid_to_str(grid, False, row_repeat_point))
             return row_repeat_point * 100
         else:
-            print('Something went wrong with this grid:')
-            print(grid)
+            if not self.is_silent:
+                print('Something went wrong with this grid:')
+                print(grid)
 
     def get_part_1_answer(self, use_sample=False) -> str:
         return str(sum([self.find_reflection_value(g, False) for g in self.grids]))

@@ -1,6 +1,6 @@
 from typing import List
 
-from helpers.grid import Grid
+from helpers.grid import ArrayGrid
 from puzzle_base import PuzzleBase
 
 
@@ -8,14 +8,14 @@ class Puzzle(PuzzleBase):
     year = 2022
     day = 14
 
-    grid: Grid
+    grid: ArrayGrid
 
     sand_spawn_point = (500, 0)
 
     last_y_pos = -1
 
     def reset(self):
-        self.grid = Grid.create_empty(1000, 1000, '.')
+        self.grid = ArrayGrid.create_empty(1000, 1000, '.')
 
     def prepare_data(self, input_data: List[str], current_part: int):
         for i in range(len(input_data)):

@@ -39,7 +39,8 @@ class Puzzle(PuzzleBase):
         rocks_before = hash(tuple([(r.x, r.y) for r in self.get_round_rocks()] + [(tilt_dir.x, tilt_dir.y)]))
 
         if rocks_before in self.rock_cache:
-            print('Cached!')
+            if not self.is_silent:
+                print('Cached!')
             self.grid.import_values(self.rock_cache[rocks_before])
             return
 
@@ -74,8 +75,9 @@ class Puzzle(PuzzleBase):
 
             for j, rock_set in enumerate(rock_history):
                 if rock_set == rocks:
-                    print(f'Loop found from {j} to {i}!')
-                    print(self.grid)
+                    if not self.is_silent:
+                        print(f'Loop found from {j} to {i}!')
+                        print(self.grid)
 
                     loop_period = i - j
                     loop_offset = (count - j) % -loop_period - 1
@@ -96,7 +98,8 @@ class Puzzle(PuzzleBase):
     def get_part_1_answer(self, use_sample=False) -> str:
         self.tilt_grid(Point(0, -1))
 
-        print(self.grid)
+        if not self.is_silent:
+            print(self.grid)
 
         return str(self.get_load(self.get_round_rocks()))
 

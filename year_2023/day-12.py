@@ -280,13 +280,15 @@ class Puzzle(PuzzleBase):
         total = 0
 
         for i, row in enumerate(self.gear_rows):
-            print(f'Calculating row {i+1} of {len(self.gear_rows)}: {row}')
+            if not self.is_silent:
+                print(f'Calculating row {i+1} of {len(self.gear_rows)}: {row}')
 
             fill_ranges, min_gears, max_gears = get_fill_ranges(row)
 
-            print(f'Leftmost fills:         {"".join(min_gears)}')
-            print(f'Rightmost fills:        {"".join(max_gears)}')
-            print(f'Ranges:                 {fill_ranges}')
+            if not self.is_silent:
+                print(f'Leftmost fills:         {"".join(min_gears)}')
+                print(f'Rightmost fills:        {"".join(max_gears)}')
+                print(f'Ranges:                 {fill_ranges}')
 
             solutions = 1
             last_fill = 1
@@ -319,8 +321,9 @@ class Puzzle(PuzzleBase):
 
                 last_fill = valid_fills
 
-            print(f'Solutions: {solutions}')
-            print('\n')
+            if not self.is_silent:
+                print(f'Solutions: {solutions}')
+                print('\n')
 
             total += solutions
 

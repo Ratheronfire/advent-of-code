@@ -148,9 +148,10 @@ class Puzzle(PuzzleBase):
         for i in range(len(grid_strs[0])):
             combined_str += '  |  '.join([grid_strs[j][i] for j in range(len(grid_strs))]) + '\n'
 
-        print(f'{starting_laser} -> {starting_dir} | {self.laser_total} Laser tiles')
-        print(combined_str[:-1])
-        print('\n')
+        if not self.is_silent:
+            print(f'{starting_laser} -> {starting_dir} | {self.laser_total} Laser tiles')
+            print(combined_str[:-1])
+            print('\n')
 
         return self.laser_total
 

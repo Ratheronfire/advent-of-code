@@ -89,7 +89,8 @@ class Puzzle(PuzzleBase):
 
         path_len = self.retrace_path(self.grid.start_pos)
 
-        print(self.grid)
+        if not self.is_silent:
+            print(self.grid)
 
         return str(path_len)
 

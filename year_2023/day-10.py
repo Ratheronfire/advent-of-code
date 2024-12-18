@@ -174,6 +174,9 @@ class Puzzle(PuzzleBase):
                     self.grid[(x, y)] = self.grid.default_value
 
     def pretty_print_grid(self):
+        if self.is_silent:
+            return
+
         grid_copy = ArrayGrid(self.grid.export_values(), self.grid.default_value)
 
         for x in range(self.grid.extents[0][1]):
