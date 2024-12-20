@@ -1,3 +1,4 @@
+import math
 from abc import ABC
 from typing import List, Tuple, Union, Optional
 
@@ -14,6 +15,10 @@ class Point:
     y: Union[int, float]
 
     _base_type = Union[int, float]
+
+    @property
+    def length(self):
+        return math.sqrt(self.x ** 2 + self.y ** 2)
 
     def scale(self, scalar: Union[int, float]):
         return Point(self.x * scalar, self.y * scalar)
@@ -54,11 +59,18 @@ class Point:
     def __mul__(self, scalar: int):
         return Point(self.x * scalar, self.y * scalar)
 
+    def copy(self):
+        return Point(self.x, self.y)
+
 
 class Point3D(Point):
     z: Union[int, float]
 
     _base_type = Union[int, float]
+
+    @property
+    def length(self):
+        return math.sqrt(self.x ** 2 + self.y ** 2 + self.z ** 2)
 
     def scale(self, scalar: Union[int, float]):
         return Point3D(self.x * scalar, self.y * scalar, self.z * scalar)
@@ -97,6 +109,9 @@ class Point3D(Point):
 
     def __sub__(self, other):
         return Point3D(self.x - other[0], self.y - other[1], self.z - other[2])
+
+    def copy(self):
+        return Point3D(self.x, self.y, self.z)
 
 
 Line = Tuple[Point, Point]
@@ -151,6 +166,9 @@ class Grid(ABC):
 
     @property
     def height(self) -> int:
+        pass
+
+    def copy(self):
         pass
 
     def _calculate_extents(self, newest_key=None):
@@ -258,6 +276,14 @@ class ArrayGrid(Grid):
     @property
     def height(self) -> int:
         return self.extents[1][1] - self.extents[1][0] + 1
+
+    def copy(self):
+        inner_grid = []
+
+        for row in self.grid:
+            inner_grid.append(row.copy())
+
+        return ArrayGrid.from_array(inner_grid)
 
     def _calculate_extents(self, newest_key=None):
         self.extents = [[0, 0], [0, 0]]
@@ -397,6 +423,11 @@ class SparseGrid(Grid):
     def height(self) -> int:
         return self.extents[1][1] - self.extents[1][0] + 1
 
+    def copy(self):
+        inner_grid = self.grid.copy()
+
+        return SparseGrid.from_dict(inner_grid)
+
     def _calculate_extents(self, newest_key=None):
         if not len(self.grid.keys()):
             self.extents = [[0, 0], [0, 0]]
@@ -528,6 +559,11 @@ class Grid3D(Grid):
     def height(self) -> int:
         return self.extents[2][1] - self.extents[2][0] + 1
 
+    def copy(self):
+        inner_grid = self.grid.copy()
+
+        return Grid3D.from_dict(inner_grid)
+
     def _calculate_extents(self, newest_key=None):
         if not len(self.grid.keys()):
             self.extents = [[0, 0], [0, 0], [0, 0]]
@@ -607,7 +643,7 @@ def get_line_intersection(a: Line, b: Line) -> Optional[Point]:
 
 def _get_range_for_slice(grid_slice):
     if grid_slice.step is None:
-        step = (0, 0)
+        step = (1, 1)
 
         if grid_slice.start[0] < grid_slice.stop[0]:
             step = (1, step[1])
