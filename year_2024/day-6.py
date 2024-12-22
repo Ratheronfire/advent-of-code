@@ -1,3 +1,4 @@
+from multiprocessing import Pool
 from typing import List
 
 from helpers.grid import ArrayGrid, Point
@@ -72,20 +73,6 @@ class Puzzle(PuzzleBase):
             for x in range(self.grid.width):
                 self.calculate_jumps(x, y)
 
-    def recalculate_jumps(self, target_pos: Point):
-        invalid_keys = []
-        for jump in self.jumps.keys():
-            if jump[1].x == target_pos.x or jump[1].y == target_pos.y:
-                invalid_keys.append(jump)
-
-        for jump in invalid_keys:
-            del self.jumps[jump]
-
-        for x in range(0, self.grid.width):
-            self.calculate_jumps(x, target_pos.y)
-        for y in range(0, self.grid.height):
-            self.calculate_jumps(target_pos.x, y)
-
     def calculate_jumps(self, x: int, y: int):
         pos = Point(x, y)
         neighbors = self.grid.neighbors(Point(x, y), True)
@@ -123,25 +110,35 @@ class Puzzle(PuzzleBase):
 
         return guard_pos
 
-    def step_grid(self, guard_pos: Point, direction: str):
+    def step_grid(self, guard_pos: Point, direction: str, obstacle_pos: Point | None = None):
         if (direction, guard_pos) in self.jumps:
-            return self.jumps[(direction, guard_pos)]
+            may_hit_obstacle = False
+
+            if obstacle_pos:
+                offset = OFFSETS[direction]
+                if (offset.x != 0 and guard_pos.y == obstacle_pos.y) or \
+                        (offset.y != 0 and guard_pos.x == obstacle_pos.x):
+                    may_hit_obstacle = True
+
+            if not may_hit_obstacle:
+                return self.jumps[(direction, guard_pos)]
 
         next_pos = guard_pos + OFFSETS[direction]
 
-        if self.grid[next_pos] is None or self.grid[next_pos] in '.X<>^v':
+        if (self.grid[next_pos] is None or self.grid[next_pos] in '.X<>^v') and next_pos != obstacle_pos:
             return next_pos
         else:
             return guard_pos
 
-    def simulate_guard_path(self, guard_pos: Point, guard_dir: str) -> tuple[list[PathStep], bool]:
+    def simulate_guard_path(self, guard_pos: Point, guard_dir: str, obstacle_pos: Point | None = None) -> tuple[list[PathStep], bool]:
         visited_tiles: list[PathStep] = [(guard_dir, guard_pos)]
         looped = False
 
         while True:
-            guard_pos = self.step_grid(guard_pos, guard_dir)
+            guard_pos = self.step_grid(guard_pos, guard_dir, obstacle_pos)
 
-            if self.grid[guard_pos + OFFSETS[guard_dir]] and self.grid[guard_pos + OFFSETS[guard_dir]] in '#O':
+            if self.grid[guard_pos + OFFSETS[guard_dir]] and \
+                    (self.grid[guard_pos + OFFSETS[guard_dir]] in '#O' or guard_pos + OFFSETS[guard_dir] == obstacle_pos):
                 guard_dir = ROTATIONS[guard_dir]
 
             if self.grid[guard_pos + OFFSETS[guard_dir]] is None:
@@ -172,32 +169,29 @@ class Puzzle(PuzzleBase):
 
         return full_tiles, looped
 
+    def test_for_loop(self, step: PathStep) -> tuple[bool, Point]:
+        start_pos = self.find_guard()
+        start_dir = self.grid[start_pos]
+
+        direction, position = step
+        obstacle_pos = position + OFFSETS[direction]
+
+        if obstacle_pos == start_pos or self.grid[obstacle_pos] != '.':
+            return False, Point(-1, -1)
+
+        alternate_path, looped = self.simulate_guard_path(start_pos, start_dir, obstacle_pos)
+
+        return looped, obstacle_pos
+
     def get_loop_count(self) -> int:
         start_pos = self.find_guard()
         start_dir = self.grid[start_pos]
         canonical_path = self.simulate_guard_path(start_pos, start_dir)[0]
 
-        loop_points = set()
+        with Pool(5) as pool:
+            loop_results = pool.map(self.test_for_loop, canonical_path)
 
-        for step in canonical_path:
-            direction, position = step
-            obstacle_pos = position + OFFSETS[direction]
-
-            if obstacle_pos == start_pos or self.grid[obstacle_pos] != '.':
-                continue
-
-            self.grid[obstacle_pos] = 'O'
-            self.recalculate_jumps(obstacle_pos)
-
-            alternate_path, looped = self.simulate_guard_path(start_pos, start_dir)
-
-            if looped:
-                loop_points.add(obstacle_pos)
-
-            self.grid[obstacle_pos] = '.'
-            self.recalculate_jumps(obstacle_pos)
-
-        return len(loop_points)
+        return len(set([l[1] for l in loop_results if l[0]]))
 
     def get_part_1_answer(self, use_sample=False) -> str:
         guard_pos = self.find_guard()
